@@ -1,7 +1,6 @@
 DECLARE @DynamicColumns NVARCHAR(MAX); 
 DECLARE @SQLQuery NVARCHAR(MAX);
 
--- Generate dynamic column names (DayOfMonth)
 SELECT @DynamicColumns = STRING_AGG(QUOTENAME(DayOfMonth), ',') 
 FROM ( 
     SELECT DISTINCT DATEPART(DAY, ML.Dates) AS DayOfMonth 
@@ -12,13 +11,12 @@ FROM (
     AND DATEPART(YEAR, AD.Dates) = '2024' 
 ) AS Days;
 
--- Create the dynamic SQL query
 SET @SQLQuery = '
 WITH AttendanceData AS (
     SELECT 
         DATEPART(DAY, ML.Dates) AS DayOfMonth, 
         ad.WorkManSl AS WorkManSLNo, 
-        ad.WorkManName AS WorkManName,
+        ad.WorkManName AS WorkManName, 
         CASE 
             WHEN (ML.EngagementType = AD.EngagementType AND Present = ''True'') THEN ''P'' 
             ELSE ''A'' 
@@ -40,20 +38,14 @@ SELECT
     Month, 
     Year, 
     ' + @DynamicColumns + ', 
-    ( 
-        SELECT COUNT(*) 
-        FROM App_AttendanceDetails AS ad2
-        WHERE ad2.WorkManSl = ad1.WorkManSLNo
-        AND ad2.DayDef = ''P''  -- Counting the number of days present ('P')
-        AND DATEPART(MONTH, ad2.Dates) = 9  -- Ensure the correct month is used
-        AND DATEPART(YEAR, ad2.Dates) = 2024  -- Ensure the correct year is used
-    ) AS totalpresent
-FROM AttendanceData AS ad1
+    NULL AS totalpresent, 
+    NULL AS totalleave, 
+    NULL AS totalholiday
+FROM AttendanceData
 PIVOT ( 
     MAX(Present) FOR DayOfMonth IN (' + @DynamicColumns + ') 
 ) AS PivotTable
 ORDER BY WorkManSLNo;
 ';
 
--- Execute the dynamic SQL query
-EXEC sp_executeSQL @SQLQuery;
+EXEC sp_executesql @SQLQuery;
