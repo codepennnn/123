@@ -1,7 +1,6 @@
 DECLARE @DynamicColumns NVARCHAR(MAX); 
 DECLARE @SQLQuery NVARCHAR(MAX);
 
--- Generate dynamic column names (DayOfMonth)
 SELECT @DynamicColumns = STRING_AGG(QUOTENAME(DayOfMonth), ',') 
 FROM ( 
     SELECT DISTINCT DATEPART(DAY, ML.Dates) AS DayOfMonth 
@@ -12,7 +11,6 @@ FROM (
     AND DATEPART(YEAR, AD.Dates) = '2024' 
 ) AS Days;
 
--- Create the dynamic SQL query
 SET @SQLQuery = '
 WITH AttendanceData AS (
     SELECT 
@@ -33,7 +31,6 @@ WITH AttendanceData AS (
     AND DATEPART(YEAR, AD.Dates) = ''2024''
 )
 
--- Final SELECT statement with the dynamic PIVOT
 SELECT 
     WorkManSLNo, 
     WorkManName, 
@@ -41,7 +38,6 @@ SELECT
     Month, 
     Year, 
     ' + @DynamicColumns + ', 
-    -- Calculating total present
     ( 
         SELECT COUNT(*) 
         FROM AttendanceData AS ad2
@@ -55,5 +51,4 @@ PIVOT (
 ORDER BY WorkManSLNo;
 ';
 
--- Execute the dynamic SQL query
 EXEC sp_executeSQL @SQLQuery;
