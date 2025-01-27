@@ -46,7 +46,7 @@ FROM AttendanceData
 PIVOT ( 
     MAX(Present) FOR DayOfMonth IN (' + @DynamicColumns + ') 
 ) AS PivotTable
-GROUP BY WorkManSLNo, WorkManName, Eng_Type, Month, Year, ' + @DynamicColumns + '
+GROUP BY WorkManSLNo, WorkManName, Eng_Type, Month, Year
 ORDER BY WorkManSLNo;
 ';
 
