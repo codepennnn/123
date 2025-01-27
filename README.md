@@ -40,12 +40,18 @@ SELECT
     Month, 
     Year, 
     ' + @DynamicColumns + ', 
-    SUM(CASE WHEN Present = ''P'' THEN 1 ELSE 0 END) AS totalpresent
-FROM AttendanceData
+    ( 
+        SELECT COUNT(*) 
+        FROM App_AttendanceDetails AS ad2
+        WHERE ad2.WorkManSl = ad1.WorkManSLNo
+        AND ad2.DayDef = ''P''  -- Counting the number of days present ('P')
+        AND DATEPART(MONTH, ad2.Dates) = 9  -- Ensure the correct month is used
+        AND DATEPART(YEAR, ad2.Dates) = 2024  -- Ensure the correct year is used
+    ) AS totalpresent
+FROM AttendanceData AS ad1
 PIVOT ( 
     MAX(Present) FOR DayOfMonth IN (' + @DynamicColumns + ') 
 ) AS PivotTable
-GROUP BY WorkManSLNo, WorkManName, Eng_Type, Month, Year
 ORDER BY WorkManSLNo;
 ';
 
