@@ -39,9 +39,9 @@ SELECT
     Month, 
     Year, 
     ' + @DynamicColumns + ', 
-    SUM(CASE WHEN DayDef = ''LV'' THEN 1 ELSE 0 END) AS totalLV,
-    SUM(CASE WHEN DayDef = ''HD'' THEN 1 ELSE 0 END) AS totalHD,
-    SUM(CASE WHEN DayDef = ''WD'' THEN 1 ELSE 0 END) AS totalWD
+    SUM(CASE WHEN Present = ''P'' THEN 1 ELSE 0 END) AS TotalPresent,
+    SUM(CASE WHEN DayDef = ''HD'' THEN 1 ELSE 0 END) AS TotalHoliday,
+    SUM(CASE WHEN DayDef = ''LV'' THEN 1 ELSE 0 END) AS Leave
 FROM AttendanceData
 PIVOT ( 
     MAX(Present) FOR DayOfMonth IN (' + @DynamicColumns + ') 
