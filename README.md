@@ -1,6 +1,7 @@
 DECLARE @DynamicColumns NVARCHAR(MAX); 
 DECLARE @SQLQuery NVARCHAR(MAX);
 
+-- Generate the dynamic columns list
 SELECT @DynamicColumns = STRING_AGG(QUOTENAME(DayOfMonth), ',') 
 FROM ( 
     SELECT DISTINCT DATEPART(DAY, ML.Dates) AS DayOfMonth 
@@ -11,7 +12,11 @@ FROM (
     AND DATEPART(YEAR, AD.Dates) = '2024' 
 ) AS Days;
 
+-- Create the temporary table for pivoted data
 SET @SQLQuery = '
+IF OBJECT_ID(''tempdb..#PivotTable'') IS NOT NULL
+    DROP TABLE #PivotTable;
+
 WITH AttendanceData AS (
     SELECT 
         DATEPART(DAY, ML.Dates) AS DayOfMonth, 
@@ -32,6 +37,21 @@ WITH AttendanceData AS (
     AND DATEPART(YEAR, AD.Dates) = ''2024''
 )
 
+-- Insert pivoted data into temporary table
+SELECT 
+    WorkManSLNo, 
+    WorkManName, 
+    Eng_Type, 
+    Month, 
+    Year, 
+    ' + @DynamicColumns + '
+INTO #PivotTable
+FROM AttendanceData
+PIVOT ( 
+    MAX(Present) FOR DayOfMonth IN (' + @DynamicColumns + ') 
+) AS PivotTable;
+
+-- Final select with additional columns
 SELECT 
     WorkManSLNo, 
     WorkManName, 
@@ -42,12 +62,10 @@ SELECT
     SUM(CASE WHEN Present = ''P'' THEN 1 ELSE 0 END) AS TotalPresent,
     SUM(CASE WHEN DayDef = ''HD'' THEN 1 ELSE 0 END) AS TotalHoliday,
     SUM(CASE WHEN DayDef = ''LV'' THEN 1 ELSE 0 END) AS Leave
-FROM AttendanceData
-PIVOT ( 
-    MAX(Present) FOR DayOfMonth IN (' + @DynamicColumns + ') 
-) AS PivotTable
+FROM #PivotTable
 GROUP BY WorkManSLNo, WorkManName, Eng_Type, Month, Year
 ORDER BY WorkManSLNo;
 ';
 
+-- Execute the dynamic SQL query
 EXEC sp_executesql @SQLQuery;
