@@ -46,8 +46,8 @@ FROM AttendanceData
 PIVOT ( 
     MAX(Present) FOR DayOfMonth IN (' + @DynamicColumns + ') 
 ) AS PivotTable
-GROUP BY WorkManSLNo, WorkManName, Eng_Type, Month, Year
+GROUP BY WorkManSLNo, WorkManName, Eng_Type, Month, Year, ' + @DynamicColumns + '
 ORDER BY WorkManSLNo;
 ';
 
-EXEC sp_executesql @SQLQuery;  asif
+EXEC sp_executesql @SQLQuery;
