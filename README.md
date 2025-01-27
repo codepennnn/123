@@ -1,7 +1,6 @@
 DECLARE @DynamicColumns NVARCHAR(MAX); 
 DECLARE @SQLQuery NVARCHAR(MAX);
 
--- Generate dynamic column names (DayOfMonth)
 SELECT @DynamicColumns = STRING_AGG(QUOTENAME(DayOfMonth), ',') 
 FROM ( 
     SELECT DISTINCT DATEPART(DAY, ML.Dates) AS DayOfMonth 
@@ -12,7 +11,6 @@ FROM (
     AND DATEPART(YEAR, AD.Dates) = '2024' 
 ) AS Days;
 
--- Create the dynamic SQL query
 SET @SQLQuery = '
 WITH AttendanceData AS (
     SELECT 
@@ -52,5 +50,4 @@ GROUP BY WorkManSLNo, WorkManName, Eng_Type, Month, Year
 ORDER BY WorkManSLNo;
 ';
 
--- Execute the dynamic SQL query
-EXEC sp_executesql @SQLQuery;
+EXEC sp_executesql @SQLQuery;  asif
