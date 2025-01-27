@@ -38,16 +38,12 @@ SELECT
     Month, 
     Year, 
     ' + @DynamicColumns + ', 
-    ( 
-        SELECT COUNT(*) 
-        FROM AttendanceData AS ad2
-        WHERE ad2.WorkManSLNo = ad1.WorkManSLNo
-        AND ad2.Present = ''P''
-    ) AS totalpresent
-FROM AttendanceData AS ad1
+    COUNT(CASE WHEN Present = ''P'' THEN 1 END) AS totalpresent
+FROM AttendanceData
 PIVOT ( 
     MAX(Present) FOR DayOfMonth IN (' + @DynamicColumns + ') 
 ) AS PivotTable
+GROUP BY WorkManSLNo, WorkManName, Eng_Type, Month, Year
 ORDER BY WorkManSLNo;
 ';
 
