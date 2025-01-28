@@ -1,3 +1,7 @@
+ string str_exit = ds.Tables[0].Rows[j]["Date_of_Exit"].ToString();
+                    string str_notice = ds.Tables[0].Rows[j]["Date_of_Notice"].ToString();
+
+
 DECLARE @DynamicColumns NVARCHAR(MAX); 
 DECLARE @SQLQuery NVARCHAR(MAX);
 
