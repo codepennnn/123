@@ -1,4 +1,21 @@
 
+
+
+
+      select WorkManSl,WorkManName,EngagementType,DayDef,Present,
+
+        SUM(TotalPresent present  that is DayDef 'WD' and present 1) As Present ,
+
+        SUM(TotalLeave that is DayDef 'LV' ) As Leave,
+
+        SUM(totalHoliday that is DayDef 'HD' ) As Holiday,
+      
+      from App_AttendanceDetails where 
+      
+      VendorCode='17201' and datepart(month,dates)='10' and datepart(year,dates)='2024' and AadharNo='275225445020'
+
+
+----
     Select '10' as month,'2024' as year,convert(varchar,datepart(d, ML.Dates) )as Dates,
    ML.EngagementType,
    ad.WorkManSl as WorkManSLNo,
