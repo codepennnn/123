@@ -2,6 +2,28 @@
 
 
 
+select Recog.V_CODE, vm.V_NAME, Recog.WO_NO, Recog.End_Date as Recognised_End_Date,
+ master.End_Date as Master_End_Date
+
+from APP_RECOGNIZED_WO Recog
+inner join App_Vendorwodetails master
+on Recog.V_CODE = master.V_CODE AND
+ Recog.WO_NO = master.WO_NO
+
+ inner join
+ App_VendorMaster vm
+ on Recog.V_CODE = vm.V_CODE
+
+ where master.WO_NO in (select WO_NO from APP_RECOGNIZED_WO where Recog.WO_NO = master.WO_NO) and
+ 
+ Recog.END_DATE <> master.END_DATE
+
+ order by V_NAME
+
+
+
+
+-------------------------------
       select WorkManSl,WorkManName,EngagementType,DayDef,Present,
 
         SUM(TotalPresent present  that is DayDef 'WD' and present 1) As Present ,
