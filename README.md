@@ -1,5 +1,11 @@
 
 
+ e.Row.Cells[7].Text = (Convert.ToDateTime(e.Row.Cells[7].Text.Substring(0, 10))).ToString("dd/MM/yyyy");
+
+
+
+-------------------------------------------------------------------------------------
+
 if (e.Row.RowType.ToString().ToUpper() == "DATAROW")
 {
     if (!string.IsNullOrWhiteSpace(e.Row.Cells[7].Text) && e.Row.Cells[7].Text.Trim() != "&nbsp;")
