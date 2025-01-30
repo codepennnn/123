@@ -1,6 +1,14 @@
-
-
- e.Row.Cells[7].Text = (Convert.ToDateTime(e.Row.Cells[7].Text.Substring(0, 10))).ToString("dd/MM/yyyy");
+if (e.Row.RowType == DataControlRowType.DataRow) // Ensure it's a data row
+{
+    if (!string.IsNullOrWhiteSpace(e.Row.Cells[7].Text) && e.Row.Cells[7].Text.Trim() != "&nbsp;")
+    {
+        DateTime parsedDate;
+        if (DateTime.TryParse(e.Row.Cells[7].Text.Trim(), out parsedDate))
+        {
+            e.Row.Cells[7].Text = parsedDate.ToString("dd/MM/yyyy");
+        }
+    }
+}
 
 
 
