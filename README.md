@@ -1,5 +1,15 @@
 
 
+SELECT AadharNo, Dates, COUNT(*) AS RecordCount
+FROM App_AttendanceDetails
+WHERE AadharNo = '799039612073' 
+AND WorkOrderNo = '4700023666'
+AND YEAR(Dates) = 2024 
+AND MONTH(Dates) = 2
+GROUP BY AadharNo, Dates
+HAVING COUNT(*) > 1;
+_________
+
 my workman present 7 days according to attendance table but why its count 14 days in this query
   select distinct  (select top 1 EMP_ESI_EXEMPTED from App_EmployeeMaster where VendorCode = AttDtl.VendorCode and 
       AadharCard = AttDtl.AadharNo order by CreatedOn desc) EMP_ESI_EXEMPTED, 
