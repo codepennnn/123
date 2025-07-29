@@ -64,6 +64,33 @@ public async Task<IActionResult> EmpTaggingMaster(string Pno, int Position, stri
                         <input type="checkbox" class="form-check-input worksite-checkbox"
                                value="@item.Value" id="worksite_@item.Value" />
                         <label class="form-check-label" for="worksite_@item.Value">@item.Text</label>
+
+
+@section Scripts {
+<script>
+    $(document).ready(function () {
+
+        // Show form
+        $('#showFormButton2').click(function () {
+            $('#formContainer').show();
+            $('#Pno').val('');
+            $('#Position').val('');
+            $('.worksite-checkbox').prop('checked', false);
+        });
+
+        // Before form submit, collect all checked worksite values
+        $('form').on('submit', function () {
+            var selected = [];
+            $('.worksite-checkbox:checked').each(function () {
+                selected.push($(this).val());
+            });
+            $('#Worksite').val(selected.join(','));
+        });
+    });
+</script>
+}
+
+                        
                     </div>
                 </li>
             }
