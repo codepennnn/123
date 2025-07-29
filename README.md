@@ -1,13 +1,14 @@
-       int pageSize = 5;
-       var queryCoordinators = context.AppCoordinatorMasters.AsQueryable();
+ 'App_Position_Worksite';
+ID
+Position
+Worksite
+CreatedBy
+CreatedOn
 
-       if (!string.IsNullOrEmpty(searchString))
-           queryCoordinators = queryCoordinators.Where(c => c.Pno.Contains(searchString));
+ 'App_Emp_Position';
 
-       var data = queryCoordinators.OrderBy(c => c.Pno).ToList();
-       var pagedData = data.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+ID
+Pno
+Position
 
-       ViewBag.pList = pagedData;
-       ViewBag.CurrentPage = page;
-       ViewBag.TotalPages = (int)Math.Ceiling(data.Count / (double)pageSize);
-       ViewBag.SearchString = searchString;
+select Work_Site from App_LocationMaster where ID='dcc4f6c1-f4be-46cd-a3d3-0829e98e3e2a'
