@@ -1,138 +1,110 @@
-<div class="col-md-4">
-    <label>Worksite</label>
+[HttpGet]
+public async Task<IActionResult> EmpTaggingMaster(Guid? id)
+{
+    var UserId = HttpContext.Request.Cookies["Session"];
+    if (string.IsNullOrEmpty(UserId))
+        return RedirectToAction("Login", "User");
 
-    <div class="dropdown">
-        <input class="form-control form-control-sm" placeholder="Select Worksites"
-               type="button" id="worksiteDropdown" data-bs-toggle="dropdown" aria-expanded="false" />
+    ViewBag.CreatedBy = UserId;
 
-        <ul class="dropdown-menu w-100" aria-labelledby="worksiteDropdown" id="locationList" style="max-height: 200px; overflow-y: auto;">
-            @foreach (var item in ViewBag.WorksiteList as List<SelectListItem>)
+  
+    var loggedInEmp = await context.AppCoordinatorMasters.FirstOrDefaultAsync(e => e.Pno == UserId);
+    if (loggedInEmp == null)
+        return Unauthorized();
+
+    string userDept = loggedInEmp.DeptName;
+
+ 
+    ViewBag.PnoList = context.AppCoordinatorMasters
+        .Where(e => e.DeptName == userDept)
+        .Select(e => new SelectListItem
+        {
+            Value = e.Pno,
+            Text = e.Pno
+        }).ToList();
+
+
+
+
+
+    // Get Worksite list via SQL
+    List<SelectListItem> worksiteList = new();
+    string connectionString = GetRFIDConnectionString();
+    using (SqlConnection conn = new SqlConnection(connectionString))
+    {
+        await conn.OpenAsync();
+        string query = "SELECT ID, Work_Site FROM App_LocationMaster";
+        using (SqlCommand cmd = new SqlCommand(query, conn))
+        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+        {
+            while (await reader.ReadAsync())
             {
-                <li style="margin-left:5%;">
-                    <div class="form-check">
-                        <input type="checkbox" class="form-check-input worksite-checkbox"
-                               value="@item.Value" id="worksite_@item.Value" />
-                        <label class="form-check-label" for="worksite_@item.Value">@item.Text</label>
-                    </div>
-                </li>
+                worksiteList.Add(new SelectListItem
+                {
+                    Value = reader["ID"].ToString(),
+                    Text = reader["Work_Site"].ToString()
+                });
             }
-        </ul>
-    </div>
+        }
+    }
 
-    <!-- This hidden field stores selected values -->
-    <input type="hidden" id="Worksite" name="Worksite" />
+    ViewBag.WorksiteList = worksiteList;
 
-
-
-
-    @section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-
-            // Show form and reset
-            $('#showFormButton2').click(function () {
-                $('#formContainer').show();
-                $('#Pno').val('');
-                $('#Position').val('');
-                $('.worksite-checkbox').prop('checked', false);
-            });
-
-            // Collect checked worksite values before form submit
-            $('form').on('submit', function () {
-                var selected = [];
-                $('.worksite-checkbox:checked').each(function () {
-                    selected.push($(this).val());
-                });
-                $('#Worksite').val(selected.join(','));
-            });
-
-            // Placeholder for edit via AJAX
-            $('.OpenFilledForm').click(function () {
-                const id = $(this).data('id');
-                $.ajax({
-                    url: '@Url.Action("EmpTaggingMaster", "Master")',
-                    data: { id: id },
-                    success: function (data) {
-                        $('#formContainer').show();
-                        $('#Pno').val(data.pno);
-                        $('#Position').val(data.position);
-                        $('.worksite-checkbox').prop('checked', false);
-                        if (data.worksiteIds) {
-                            data.worksiteIds.forEach(id => {
-                                $('#worksite_' + id).prop('checked', true);
-                            });
-                        }
-                    },
-                    error: function () {
-                        alert("Error loading data");
-                    }
-                });
-            });
-        });
-    </script>
-}
-
-</div>
-
-
-
-@section Scripts {
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <script>
-        $(document).ready(function () {
-
-            // Show form and reset
-            $('#showFormButton2').click(function () {
-                $('#formContainer').show();
-                $('#Pno').val('');
-                $('#Position').val('');
-                $('.worksite-checkbox').prop('checked', false);
-            });
-
-            // Collect checked worksite values before form submit
-            $('form').on('submit', function () {
-                var selected = [];
-                $('.worksite-checkbox:checked').each(function () {
-                    selected.push($(this).val());
-                });
-                $('#Worksite').val(selected.join(','));
-            });
-
-            // Placeholder for edit via AJAX
-            $('.OpenFilledForm').click(function () {
-                const id = $(this).data('id');
-                $.ajax({
-                    url: '@Url.Action("EmpTaggingMaster", "Master")',
-                    data: { id: id },
-                    success: function (data) {
-                        $('#formContainer').show();
-                        $('#Pno').val(data.pno);
-                        $('#Position').val(data.position);
-                        $('.worksite-checkbox').prop('checked', false);
-                        if (data.worksiteIds) {
-                            data.worksiteIds.forEach(id => {
-                                $('#worksite_' + id).prop('checked', true);
-                            });
-                        }
-                    },
-                    error: function () {
-                        alert("Error loading data");
-                    }
-                });
-            });
-        });
-    </script>
+    return View();
 }
 
 
 
+
+
+[HttpPost]
 public async Task<IActionResult> EmpTaggingMaster(string Pno, int Position, string Worksite)
 {
+    var UserId = HttpContext.Request.Cookies["Session"];
+    if (string.IsNullOrEmpty(UserId))
+        return RedirectToAction("Login", "User");
+
+    // --- Update or Insert AppEmpPosition ---
+    var empPosition = await context.AppEmpPositions.FirstOrDefaultAsync(e => e.Pno == Pno);
+    if (empPosition != null)
+    {
+        empPosition.Position = Position;
+        context.AppEmpPositions.Update(empPosition);
+    }
+    else
+    {
+        empPosition = new AppEmpPosition
+        {
+            Id = Guid.NewGuid(),
+            Pno = Pno,
+            Position = Position
+        };
+        await context.AppEmpPositions.AddAsync(empPosition);
+    }
+
+    // --- Replace worksite entries ---
+    var oldWorksites = context.AppPositionWorksites.Where(w => w.Position == Position).ToList();
+    context.AppPositionWorksites.RemoveRange(oldWorksites);
+
+    // Convert hidden input string to list
     var worksiteIds = Worksite?.Split(',').Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? new();
-    
-    // Then save or update accordingly
+
+    foreach (var wsId in worksiteIds)
+    {
+        var ws = new AppPositionWorksite
+        {
+            Id = Guid.NewGuid(),
+            Position = Position,
+            Worksite = wsId,
+            CreatedBy = UserId,
+            CreatedOn = DateTime.Now
+        };
+        await context.AppPositionWorksites.AddAsync(ws);
+    }
+
+    await context.SaveChangesAsync();
+    TempData["msg"] = "Tagged Successfully!";
+    return RedirectToAction("EmpTaggingMaster");
 }
+
 
