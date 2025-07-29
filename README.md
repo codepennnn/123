@@ -1,110 +1,44 @@
-[HttpGet]
-public async Task<IActionResult> EmpTaggingMaster(Guid? id)
+// --- Save worksite in a single record ---
+var existingWorksite = await context.AppPositionWorksites
+    .FirstOrDefaultAsync(w => w.Position == Position);
+
+if (existingWorksite != null)
 {
-    var UserId = HttpContext.Request.Cookies["Session"];
-    if (string.IsNullOrEmpty(UserId))
-        return RedirectToAction("Login", "User");
-
-    ViewBag.CreatedBy = UserId;
-
-  
-    var loggedInEmp = await context.AppCoordinatorMasters.FirstOrDefaultAsync(e => e.Pno == UserId);
-    if (loggedInEmp == null)
-        return Unauthorized();
-
-    string userDept = loggedInEmp.DeptName;
-
- 
-    ViewBag.PnoList = context.AppCoordinatorMasters
-        .Where(e => e.DeptName == userDept)
-        .Select(e => new SelectListItem
-        {
-            Value = e.Pno,
-            Text = e.Pno
-        }).ToList();
-
-
-
-
-
-    // Get Worksite list via SQL
-    List<SelectListItem> worksiteList = new();
-    string connectionString = GetRFIDConnectionString();
-    using (SqlConnection conn = new SqlConnection(connectionString))
-    {
-        await conn.OpenAsync();
-        string query = "SELECT ID, Work_Site FROM App_LocationMaster";
-        using (SqlCommand cmd = new SqlCommand(query, conn))
-        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-        {
-            while (await reader.ReadAsync())
-            {
-                worksiteList.Add(new SelectListItem
-                {
-                    Value = reader["ID"].ToString(),
-                    Text = reader["Work_Site"].ToString()
-                });
-            }
-        }
-    }
-
-    ViewBag.WorksiteList = worksiteList;
-
-    return View();
+    // Update existing
+    existingWorksite.Worksite = string.Join(",", worksiteIds);
+    existingWorksite.CreatedBy = UserId;
+    existingWorksite.CreatedOn = DateTime.Now;
+    context.AppPositionWorksites.Update(existingWorksite);
 }
-
-
-
-
-
-[HttpPost]
-public async Task<IActionResult> EmpTaggingMaster(string Pno, int Position, string Worksite)
+else
 {
-    var UserId = HttpContext.Request.Cookies["Session"];
-    if (string.IsNullOrEmpty(UserId))
-        return RedirectToAction("Login", "User");
-
-    // --- Update or Insert AppEmpPosition ---
-    var empPosition = await context.AppEmpPositions.FirstOrDefaultAsync(e => e.Pno == Pno);
-    if (empPosition != null)
+    // Create new
+    var ws = new AppPositionWorksite
     {
-        empPosition.Position = Position;
-        context.AppEmpPositions.Update(empPosition);
-    }
-    else
+        Id = Guid.NewGuid(),
+        Position = Position,
+        Worksite = string.Join(",", worksiteIds),
+        CreatedBy = UserId,
+        CreatedOn = DateTime.Now
+    };
+    await context.AppPositionWorksites.AddAsync(ws);
+
+
+
+
+    // Get logged-in employee from AppEmployeeMaster
+var loggedInEmp = await context.AppEmployeeMasters.FirstOrDefaultAsync(e => e.Pno == UserId);
+if (loggedInEmp == null)
+    return Unauthorized();
+
+string userDept = loggedInEmp.DeptName;
+
+// Filter PNOs from CoordinatorMaster where DeptName = user's dept
+ViewBag.PnoList = context.AppCoordinatorMasters
+    .Where(e => e.DeptName == userDept)
+    .Select(e => new SelectListItem
     {
-        empPosition = new AppEmpPosition
-        {
-            Id = Guid.NewGuid(),
-            Pno = Pno,
-            Position = Position
-        };
-        await context.AppEmpPositions.AddAsync(empPosition);
-    }
-
-    // --- Replace worksite entries ---
-    var oldWorksites = context.AppPositionWorksites.Where(w => w.Position == Position).ToList();
-    context.AppPositionWorksites.RemoveRange(oldWorksites);
-
-    // Convert hidden input string to list
-    var worksiteIds = Worksite?.Split(',').Where(x => !string.IsNullOrWhiteSpace(x)).ToList() ?? new();
-
-    foreach (var wsId in worksiteIds)
-    {
-        var ws = new AppPositionWorksite
-        {
-            Id = Guid.NewGuid(),
-            Position = Position,
-            Worksite = wsId,
-            CreatedBy = UserId,
-            CreatedOn = DateTime.Now
-        };
-        await context.AppPositionWorksites.AddAsync(ws);
-    }
-
-    await context.SaveChangesAsync();
-    TempData["msg"] = "Tagged Successfully!";
-    return RedirectToAction("EmpTaggingMaster");
+        Value = e.Pno,
+        Text = e.Pno
+    }).ToList();
 }
-
-
