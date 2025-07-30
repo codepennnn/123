@@ -1,93 +1,56 @@
-[HttpGet]
-public async Task<IActionResult> EmpTaggingMaster(Guid? id, string searchString = "", int page = 1)
-{
-    var UserId = HttpContext.Request.Cookies["Session"];
-    if (string.IsNullOrEmpty(UserId))
-        return RedirectToAction("Login", "User");
+    <div class="col-md-12">
+        <table class="table table-bordered" id="myTable">
+            <thead class="table" style="background-color: #d2b1ff;color: #000000;">
+                <tr>
+                    <th width="50%">PNO</th>
+                    <th width="50%"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (ViewBag.pList != null)
+                {
+                    foreach (var item in ViewBag.pList)
+                    {
+                        <tr>
+                            <td>
+                                <a href="javascript:void(0);" data-id="@item.Id" class="OpenFilledForm btn gridbtn" style="text-decoration:none;background-color:#ffffff;font-weight:bolder;color:darkblue;">
+                                    @item.Pno
+                                </a>
+                            </td>
+                            <td>@item.</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="2">No data available</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
 
-    // Check permission
-    var allowedPnos = context.AppPermissionMasters.Select(x => x.Pno).ToList();
-    if (!allowedPnos.Contains(UserId))
-        return RedirectToAction("Login", "User");
+        <div class="text-center">
+            @if (ViewBag.TotalPages > 1)
+            {
+                <nav aria-label="Page navigation" class="d-flex justify-content-center">
+                    <ul class="pagination">
+                        <li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+                            <a class="page-link" asp-action="CoordinatorMaster" asp-route-page="@(ViewBag.CurrentPage - 1)" asp-route-searchString="@ViewBag.SearchString">Previous</a>
+                        </li>
+                        @for (int i = 1; i <= ViewBag.TotalPages; i++)
+                        {
+                            <li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+                                <a class="page-link" asp-action="CoordinatorMaster" asp-route-page="@i" asp-route-searchString="@ViewBag.SearchString">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+                            <a class="page-link" asp-action="CoordinatorMaster" asp-route-page="@(ViewBag.CurrentPage + 1)" asp-route-searchString="@ViewBag.SearchString">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div> 
 
-    string connectionString = GetRFIDConnectionString();
-
-    List<dynamic> empList = new();
-    List<SelectListItem> worksiteList = new();
-    List<SelectListItem> pnoDropdown = new(); // 👈 for dropdown
-
-    using (var conn = new SqlConnection(connectionString))
-    {
-        await conn.OpenAsync();
-
-        // 1. Get logged-in user's department
-        string deptSql = "SELECT DepartmentName FROM App_Empl_Master WHERE Pno = @Pno";
-        var department = await conn.QueryFirstOrDefaultAsync<string>(deptSql, new { Pno = UserId });
-
-        if (string.IsNullOrEmpty(department))
-        {
-            TempData["msg"] = "Department not found for logged-in user.";
-            return View();
-        }
-
-        // 2. Get employee data (Pno, Name, Position, Worksites)
-        string dataSql = @"
-            SELECT 
-                e.Pno,
-                e.Name,
-                ep.Position,
-                STRING_AGG(l.Work_Site, ', ') AS Worksites
-            FROM App_Empl_Master e
-            LEFT JOIN App_Emp_Position ep ON e.Pno = ep.Pno
-            LEFT JOIN App_Position_Worksite pw ON ep.Position = pw.Position
-            LEFT JOIN App_LocationMaster l ON pw.Worksite = l.ID
-            WHERE e.DepartmentName = @DeptName
-            GROUP BY e.Pno, e.Name, ep.Position
-            ORDER BY e.Pno";
-
-        empList = (await conn.QueryAsync(dataSql, new { DeptName = department })).ToList();
-
-        // 3. Prepare Pno dropdown (only Pno from department)
-        string pnoSql = @"SELECT DISTINCT Pno FROM App_Empl_Master WHERE DepartmentName = @DeptName ORDER BY Pno";
-        var rawPnos = await conn.QueryAsync<string>(pnoSql, new { DeptName = department });
-
-        pnoDropdown = rawPnos.Select(p => new SelectListItem
-        {
-            Value = p,
-            Text = p
-        }).ToList();
-
-        // 4. Worksite list
-        string wsQuery = "SELECT ID, Work_Site FROM App_LocationMaster";
-        var worksites = await conn.QueryAsync(wsQuery);
-        worksiteList = worksites.Select(ws => new SelectListItem
-        {
-            Value = ws.ID.ToString(),
-            Text = ws.Work_Site.ToString()
-        }).ToList();
-    }
-
-    // 5. Search filter
-    if (!string.IsNullOrEmpty(searchString))
-    {
-        empList = empList
-            .Where(e => ((string)e.Pno).Contains(searchString, StringComparison.OrdinalIgnoreCase)
-                     || (!string.IsNullOrEmpty((string)e.Name) && ((string)e.Name).Contains(searchString, StringComparison.OrdinalIgnoreCase)))
-            .ToList();
-    }
-
-    // 6. Pagination
-    int pageSize = 5;
-    var pagedData = empList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-    // 7. Send to View
-    ViewBag.pList = pagedData; // Table display
-    ViewBag.PnoDropdown = pnoDropdown; // Dropdown Pno
-    ViewBag.WorksiteList = worksiteList;
-
-    ViewBag.CurrentPage = page;
-    ViewBag.TotalPages = (int)Math.Ceiling(empList.Count / (double)pageSize);
-    ViewBag.SearchString = searchString;
-
-    return View();
-}
