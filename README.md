@@ -14,7 +14,7 @@ public async Task<IActionResult> EmpTaggingMaster(Guid? id, string searchString 
 
     List<dynamic> empList = new();
     List<SelectListItem> worksiteList = new();
-    List<SelectListItem> pnoList = new();
+    List<SelectListItem> pnoDropdown = new(); // 👈 for dropdown
 
     using (var conn = new SqlConnection(connectionString))
     {
@@ -30,7 +30,7 @@ public async Task<IActionResult> EmpTaggingMaster(Guid? id, string searchString 
             return View();
         }
 
-        // 2. Get employee PNOs + Name + Position + Worksites in the same department
+        // 2. Get employee data (Pno, Name, Position, Worksites)
         string dataSql = @"
             SELECT 
                 e.Pno,
@@ -47,17 +47,17 @@ public async Task<IActionResult> EmpTaggingMaster(Guid? id, string searchString 
 
         empList = (await conn.QueryAsync(dataSql, new { DeptName = department })).ToList();
 
-        // 3. PNO dropdown (all PNOs from same department)
-        pnoList = empList
-            .Select(e => new SelectListItem
-            {
-                Value = e.Pno,
-                Text = e.Pno
-            })
-            .DistinctBy(x => x.Value) // Avoid duplicate PNOs if any
-            .ToList();
+        // 3. Prepare Pno dropdown (only Pno from department)
+        string pnoSql = @"SELECT DISTINCT Pno FROM App_Empl_Master WHERE DepartmentName = @DeptName ORDER BY Pno";
+        var rawPnos = await conn.QueryAsync<string>(pnoSql, new { DeptName = department });
 
-        // 4. Worksite dropdown
+        pnoDropdown = rawPnos.Select(p => new SelectListItem
+        {
+            Value = p,
+            Text = p
+        }).ToList();
+
+        // 4. Worksite list
         string wsQuery = "SELECT ID, Work_Site FROM App_LocationMaster";
         var worksites = await conn.QueryAsync(wsQuery);
         worksiteList = worksites.Select(ws => new SelectListItem
@@ -67,7 +67,7 @@ public async Task<IActionResult> EmpTaggingMaster(Guid? id, string searchString 
         }).ToList();
     }
 
-    // 5. Filter by search string (optional)
+    // 5. Search filter
     if (!string.IsNullOrEmpty(searchString))
     {
         empList = empList
@@ -80,13 +80,14 @@ public async Task<IActionResult> EmpTaggingMaster(Guid? id, string searchString 
     int pageSize = 5;
     var pagedData = empList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
-    // Pass to view
-    ViewBag.pList = pagedData;
+    // 7. Send to View
+    ViewBag.pList = pagedData; // Table display
+    ViewBag.PnoDropdown = pnoDropdown; // Dropdown Pno
+    ViewBag.WorksiteList = worksiteList;
+
     ViewBag.CurrentPage = page;
     ViewBag.TotalPages = (int)Math.Ceiling(empList.Count / (double)pageSize);
     ViewBag.SearchString = searchString;
-    ViewBag.PnoList = pnoList;
-    ViewBag.WorksiteList = worksiteList;
 
     return View();
 }
