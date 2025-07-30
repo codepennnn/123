@@ -1,102 +1,104 @@
-  [HttpGet]
-  public async Task<IActionResult> EmpTaggingMaster(Guid? id, string searchString = "", int page = 1)
-  {
-      var UserId = HttpContext.Request.Cookies["Session"];
+..
+using Dapper;
+using System.Data.SqlClient;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
-      if (string.IsNullOrEmpty(UserId))
-          return RedirectToAction("Login", "User");
+[HttpGet]
+public async Task<IActionResult> EmpTaggingMaster(Guid? id, string searchString = "", int page = 1)
+{
+    var UserId = HttpContext.Request.Cookies["Session"];
+    if (string.IsNullOrEmpty(UserId))
+        return RedirectToAction("Login", "User");
 
-      var allowedPnos = context.AppPermissionMasters.Select(x => x.Pno).ToList();
-      if (!allowedPnos.Contains(UserId))
-          return RedirectToAction("Login", "User");
+    // Check permission
+    var allowedPnos = context.AppPermissionMasters.Select(x => x.Pno).ToList();
+    if (!allowedPnos.Contains(UserId))
+        return RedirectToAction("Login", "User");
 
+    // Use your connection string
+    string connectionString = GetRFIDConnectionString();
 
-   
-      string connectionString = GetRFIDConnectionString();
+    // Final list for dropdown
+    List<SelectListItem> pnoList = new();
+    List<SelectListItem> worksiteList = new();
 
-      List<SelectListItem> pnoList = new();
+    // Final list for table
+    List<EmpDetailsViewModel> empList = new();
 
-      using (var conn = new SqlConnection(connectionString))
-      {
-          await conn.OpenAsync();
+    using (var conn = new SqlConnection(connectionString))
+    {
+        await conn.OpenAsync();
 
-          // 3. Find department of logged-in PNO
-          string getDeptSql = "SELECT DepartmentName FROM App_Empl_Master WHERE Pno = @Pno";
-          var department = await conn.QueryFirstOrDefaultAsync<string>(getDeptSql, new { Pno = UserId });
+        // Get department of logged-in user
+        string getDeptSql = "SELECT DepartmentName FROM App_Empl_Master WHERE Pno = @Pno";
+        var department = await conn.QueryFirstOrDefaultAsync<string>(getDeptSql, new { Pno = UserId });
 
-          // 4. Get all PNOs in same department
-          string getPnosSql = @"
-      SELECT distinct Pno 
-      FROM App_Empl_Master 
-      WHERE DepartmentName = @department
-      ORDER BY Pno";
+        if (string.IsNullOrEmpty(department))
+            return Unauthorized();
 
-          var pnos = await conn.QueryAsync<string>(getPnosSql, new { DeptName = department });
+        // Get all employees in same department with position and worksite
+        string getEmpSql = @"
+            SELECT 
+                E.Pno,
+                E.Name,
+                EP.Position,
+                ISNULL(
+                    STUFF((
+                        SELECT ', ' + L.Work_Site
+                        FROM App_Position_Worksite PW
+                        JOIN App_LocationMaster L ON PW.Worksite = L.ID
+                        WHERE PW.Position = EP.Position
+                        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, ''
+                ), '') AS Worksites
+            FROM App_Empl_Master E
+            LEFT JOIN App_Emp_Position EP ON E.Pno = EP.Pno
+            WHERE E.DepartmentName = @Department
+            ORDER BY E.Pno";
 
-          // 5. Convert to SelectListItem
-          pnoList = pnos.Select(p => new SelectListItem
-          {
-              Value = p,
-              Text = p
-          }).ToList();
-      }
+        var empResults = await conn.QueryAsync<EmpDetailsViewModel>(getEmpSql, new { Department = department });
+        empList = empResults.ToList();
 
+        // Filter by search string
+        if (!string.IsNullOrEmpty(searchString))
+        {
+            empList = empList
+                .Where(e => e.Pno.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+                         || (e.Name != null && e.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+        }
 
+        // Pagination
+        int pageSize = 5;
+        var pagedData = empList.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
+        ViewBag.pList = pagedData;
+        ViewBag.CurrentPage = page;
+        ViewBag.TotalPages = (int)Math.Ceiling(empList.Count / (double)pageSize);
+        ViewBag.SearchString = searchString;
 
+        // Dropdown PNOs
+        pnoList = empList.Select(e => new SelectListItem
+        {
+            Value = e.Pno,
+            Text = e.Pno
+        }).ToList();
 
+        ViewBag.PnoList = pnoList;
 
+        // Worksite list
+        string wsQuery = "SELECT ID, Work_Site FROM App_LocationMaster";
+        var worksites = await conn.QueryAsync(wsQuery);
+        foreach (var ws in worksites)
+        {
+            worksiteList.Add(new SelectListItem
+            {
+                Value = ws.ID.ToString(),
+                Text = ws.Work_Site.ToString()
+            });
+        }
 
-      int pageSize = 5;
-      var queryCoordinators = context.AppCoordinatorMasters.AsQueryable();
+        ViewBag.WorksiteList = worksiteList;
+    }
 
-      if (!string.IsNullOrEmpty(searchString))
-          queryCoordinators = queryCoordinators.Where(c => c.Pno.Contains(searchString));
-
-      var data = queryCoordinators.OrderBy(c => c.Pno).ToList();
-      var pagedData = data.Skip((page - 1) * pageSize).Take(pageSize).ToList();
-
-      ViewBag.pList = pagedData;
-      ViewBag.CurrentPage = page;
-      ViewBag.TotalPages = (int)Math.Ceiling(data.Count / (double)pageSize);
-      ViewBag.SearchString = searchString;
-
-
-
-
-
-
-
-
-
-
-
-
-
-      // Get Worksite list via SQL
-      List<SelectListItem> worksiteList = new();
-      string connectionString = GetRFIDConnectionString();
-     
-      using (SqlConnection conn = new SqlConnection(connectionString))
-      {
-          await conn.OpenAsync();
-          string query = "SELECT ID, Work_Site FROM App_LocationMaster";
-          using (SqlCommand cmd = new SqlCommand(query, conn))
-          using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-          {
-              while (await reader.ReadAsync())
-              {
-                  worksiteList.Add(new SelectListItem
-                  {
-                      Value = reader["ID"].ToString(),
-                      Text = reader["Work_Site"].ToString()
-                  });
-              }
-          }
-      }
-
-      ViewBag.WorksiteList = worksiteList;
-
-      return View();
-  }
-
+    return View();
+}
