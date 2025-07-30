@@ -41,6 +41,25 @@ public async Task<IActionResult> EmpTaggingMaster()
         }).ToList();
     }
 
+
+
+
+SELECT 
+                E.Pno,
+                E.Name,
+                EP.Position,
+                ISNULL(
+                    STUFF((
+                        SELECT ', ' + L.Work_Site
+                        FROM App_Position_Worksite PW
+                        JOIN App_LocationMaster L ON PW.Worksite = L.ID
+                        WHERE PW.Position = EP.Position
+                        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, ''
+                ), '') AS Worksites
+            FROM App_Empl_Master E
+            LEFT JOIN App_Emp_Position EP ON E.Pno = EP.Pno
+            WHERE E.DeptName = @DeptName
+            ORDER BY E.Pno";
     // 6. Pass to view
     ViewBag.PnoList = pnoList;
     return View();
