@@ -1,3 +1,12 @@
+
+
+$('#DeptDropdown').val(data.dept);  // this sets the label display
+$('#Dept').val(data.dept);          // this sets the hidden value
+checkCheckboxesFromDropdownText();  // ← parse and check boxes
+
+
+
+
 ..
 [HttpPost]
 public async Task<IActionResult> CoordinatorMaster(CoordinatorWrapper model)
