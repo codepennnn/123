@@ -1,34 +1,35 @@
-        var existingWorksites = await context.AppPositionWorksites
-.Where(w => w.Position == Position)
-.ToListAsync();
 
-        Console.WriteLine("Found worksites: " + existingWorksites.Count);
-        foreach (var site in existingWorksites)
-        {
-            Console.WriteLine("Worksite ID: " + site.Id + ", Worksite: " + site.Worksite);
-        }
+var existingWorksites = await context.AppPositionWorksites
+    .Where(w => w.Position == Position)
+    .ToListAsync();
 
+Console.WriteLine("Found worksites: " + existingWorksites.Count);
+foreach (var site in existingWorksites)
+{
+    Console.WriteLine("Worksite ID: " + site.Id + ", Worksite: " + site.Worksite);
+}
 
+var existingWorksite = existingWorksites.FirstOrDefault();
 
-        if (existingWorksites != null)
-        {
-            existingWorksites.Worksite = Worksite;
-            existingWorksites.CreatedBy = UserId;
-            existingWorksites.CreatedOn = DateTime.Now;
-            context.AppPositionWorksites.Update(existingWorksites);
-        }
-        else
-        {
-            var ws = new AppPositionWorksite
-            {
-                Id = Guid.NewGuid(),
-                Position = Position,
-                Worksite = Worksite,
-                CreatedBy = UserId,
-                CreatedOn = DateTime.Now
-            };
-            await context.AppPositionWorksites.AddAsync(ws);
-        }
+if (existingWorksite != null)
+{
+    existingWorksite.Worksite = Worksite;
+    existingWorksite.CreatedBy = UserId;
+    existingWorksite.CreatedOn = DateTime.Now;
+    context.AppPositionWorksites.Update(existingWorksite);
+}
+else
+{
+    var ws = new AppPositionWorksite
+    {
+        Id = Guid.NewGuid(),
+        Position = Position,
+        Worksite = Worksite,
+        CreatedBy = UserId,
+        CreatedOn = DateTime.Now
+    };
+    await context.AppPositionWorksites.AddAsync(ws);
+}
 
 
 // Reset and check worksite checkboxes based on data-Worksites
