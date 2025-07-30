@@ -1,3 +1,8 @@
+
+<button type="submit" class="btn btn-danger" onclick="setAction('Delete', event)">Delete</button>
+
+
+
 [HttpPost]
 public async Task<IActionResult> EmpTaggingMaster(string Pno, int Position, string Worksite, string ActionType)
 {
