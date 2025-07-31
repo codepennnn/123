@@ -1,8 +1,11 @@
-DECLARE @DeptName NVARCHAR(MAX) = 'Administration & Event Management,Angul Business';
+@if (TempData["msg1"] != null)
+{
+        <div class="alert alert-success">@TempData["msg1"]</div>
+}
 
-SELECT DISTINCT Ema_perno
-FROM SAPHRDB.dbo.T_Empl_All
-WHERE ema_dept_desc IN (
-    SELECT value FROM STRING_SPLIT(@DeptName, ',')
-)
-ORDER BY Ema_perno;
+
+@if (TempData["Dltmsg1"] != null)
+{
+                <div class="alert alert-danger">@TempData["Dltmsg1"]</div>
+}
+
