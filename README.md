@@ -16,7 +16,7 @@ public async Task<IActionResult> CoordinatorMaster(CoordinatorWrapper model)
             coordinator.CreatedBy = UserId;
             coordinator.CreatedOn = DateTime.Now;
 
-            // Clean and deduplicate department names
+            // Clean department string
             if (!string.IsNullOrEmpty(coordinator.DeptName))
             {
                 var depts = coordinator.DeptName
@@ -27,33 +27,19 @@ public async Task<IActionResult> CoordinatorMaster(CoordinatorWrapper model)
                 coordinator.DeptName = string.Join(",", depts);
             }
 
-            AppCoordinatorMaster existing = null;
+            // ✅ Check only by Pno
+            var existing = await context.AppCoordinatorMasters
+                .FirstOrDefaultAsync(x => x.Pno == coordinator.Pno);
 
-            // Try to find by Guid Id if it's valid
-            if (!string.IsNullOrEmpty(coordinator.Id) && Guid.TryParse(coordinator.Id, out Guid guidId))
-            {
-                existing = await context.AppCoordinatorMasters.FindAsync(guidId);
-            }
-
-            // If not found by Id, try to find by Pno
-            if (existing == null && !string.IsNullOrEmpty(coordinator.Pno))
-            {
-                existing = await context.AppCoordinatorMasters
-                    .FirstOrDefaultAsync(x => x.Pno == coordinator.Pno);
-            }
-
-            // Update or Insert
             if (existing != null)
             {
-                // Overwrite only relevant fields, or all
-                context.Entry(existing).CurrentValues.SetValues(coordinator);
+                // Only update department and audit info
+                existing.DeptName = coordinator.DeptName;
+                existing.CreatedBy = coordinator.CreatedBy;
+                existing.CreatedOn = coordinator.CreatedOn;
             }
             else
             {
-                // Assign new GUID if needed
-                if (string.IsNullOrEmpty(coordinator.Id))
-                    coordinator.Id = Guid.NewGuid().ToString();
-
                 await context.AppCoordinatorMasters.AddAsync(coordinator);
             }
         }
@@ -65,12 +51,11 @@ public async Task<IActionResult> CoordinatorMaster(CoordinatorWrapper model)
     {
         foreach (var coordinator in model.Coordinators)
         {
-            if (!string.IsNullOrEmpty(coordinator.Id) && Guid.TryParse(coordinator.Id, out Guid guidId))
-            {
-                var existing = await context.AppCoordinatorMasters.FindAsync(guidId);
-                if (existing != null)
-                    context.AppCoordinatorMasters.Remove(existing);
-            }
+            var existing = await context.AppCoordinatorMasters
+                .FirstOrDefaultAsync(x => x.Pno == coordinator.Pno);
+
+            if (existing != null)
+                context.AppCoordinatorMasters.Remove(existing);
         }
 
         await context.SaveChangesAsync();
