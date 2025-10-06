@@ -28,14 +28,13 @@ SELECT
     YR.WO_NO AS WorkOrder,    
     YR.V_CODE AS VendorCode,   
     YR.V_NAME AS VendorName,     
-    'N' AS Leave_compliance,   
-    FORMAT(YR.START_DATE, 'dd-MM-yyyy') AS start_date, 
-    FORMAT(YR.END_DATE, 'dd-MM-yyyy') AS end_date,
     CASE 
-        WHEN R.WO_NO IS NOT NULL THEN 'Y' 
-        ELSE 'N' 
-    END AS Recognized_Status   -- ✅ Recognition flag added
+        WHEN R.WO_NO IS NOT NULL THEN 'Y'    -- ✅ recognized → Y
+        ELSE 'N'                             -- not recognized → N
+    END AS Leave_compliance,   
+    FORMAT(YR.START_DATE, 'dd-MM-yyyy') AS start_date, 
+    FORMAT(YR.END_DATE, 'dd-MM-yyyy') AS end_date
 FROM YearRange YR
-LEFT JOIN APP_RECOGNIZED_WO R ON R.WO_NO = YR.WO_NO   -- ✅ Check recognition
+LEFT JOIN APP_RECOGNIZED_WO R ON R.WO_NO = YR.WO_NO   -- ✅ recognition check
 ORDER BY Calendar_Year 
 OPTION (MAXRECURSION 1000);
