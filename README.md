@@ -1,40 +1,22 @@
-WITH YearRange AS ( 
-    SELECT 
-        VW.WO_NO, 
-        VW.V_CODE,  
-        VM.V_NAME,   
-        VW.START_DATE,  
-        VW.END_DATE,    
-        YEAR(VW.START_DATE) AS Calendar_Year   
-    FROM App_Vendorwodetails VW   
-    LEFT JOIN App_VendorMaster VM ON VW.V_CODE = VM.V_CODE 
-    WHERE VW.WO_NO = '4700023110' AND VW.V_CODE = '14494'  
+select FORMAT(GETDATE(), 'dd-MM-yyyy') as CURR_MONTH,tab.Leave_Year,tab.WorkOrder,tab.VendorCode,VM.V_NAME as VendorName,
+    MAX(tab.Leave_compliance) as Leave_compliance,   
+    FORMAT(VW.START_DATE, 'dd-MM-yyyy') as start_date,
+    FORMAT(VW.END_DATE, 'dd-MM-yyyy') as end_date
+from
+(select distinct D.V_Code as VendorCode,D.year as Leave_Year,D.WorkOrderNo as WorkOrder,
+   ISNULL(case when S.Status = 'Request Closed' then 'Y' else 'N' end,'N') as Leave_compliance
+    from App_Leave_Comp_Details D
+    left join App_Leave_Comp_Summary S on S.ID = D.MasterID where D.WorkOrderNo = '4700022119'  and D.V_Code = '17077'  
+    union
+    select distinct right(V_CODE,5) as VendorCode,LEAVE_YEAR as Leave_Year,WO_NO as WorkOrder,'Y' as Leave_compliance from JCMS_ONLINE_TEMP_LEAVE
+    where STATUS = 'Approved'and WO_NO = '4700022119' and right(V_CODE,5)= '17077'  
+    union  
+    select RIGHT(V_CODE, 5) as VendorCode,LEFT(proc_month, 4) as Leave_Year,WO_NO as WorkOrder,'Y' as Leave_compliance from JCMS_C_ENTRY_DETAILS where C_NO = '7' and WO_NO = '4700022119' and RIGHT(V_CODE,5)= '17077'  
+) tab
+left join App_Vendorwodetails VW on VW.WO_NO = tab.WorkOrder   
+left join App_VendorMaster VM on VM.V_CODE = tab.VendorCode  
+group by tab.Leave_Year, tab.WorkOrder, tab.VendorCode, VM.V_NAME, VW.START_DATE, VW.END_DATE
+order by tab.Leave_Year;
 
-    UNION ALL 
-
-    SELECT      
-        VW.WO_NO,       
-        VW.V_CODE,        
-        VW.V_NAME,     
-        VW.START_DATE, 
-        VW.END_DATE,    
-        Calendar_Year + 1  
-    FROM YearRange VW   
-    WHERE Calendar_Year + 1 <= YEAR(VW.END_DATE) 
-)
-SELECT 
-    FORMAT(GETDATE(), 'dd-MM-yyyy') AS CURR_MONTH,  
-    Calendar_Year AS Leave_Year,   
-    YR.WO_NO AS WorkOrder,    
-    YR.V_CODE AS VendorCode,   
-    YR.V_NAME AS VendorName,     
-    CASE 
-        WHEN R.WO_NO IS NOT NULL THEN 'Y'    -- ✅ recognized → Y
-        ELSE 'N'                             -- not recognized → N
-    END AS Leave_compliance,   
-    FORMAT(YR.START_DATE, 'dd-MM-yyyy') AS start_date, 
-    FORMAT(YR.END_DATE, 'dd-MM-yyyy') AS end_date
-FROM YearRange YR
-LEFT JOIN APP_RECOGNIZED_WO R ON R.WO_NO = YR.WO_NO   -- ✅ recognition check
-ORDER BY Calendar_Year 
-OPTION (MAXRECURSION 1000);
+my workorder validity 01-01-2023 to 31-03-2026 so row must be 23,24,25,26 - 5 records but its showing 2 records only 23,25 because leave data only in this two year
+so i want all data as per workorder validity and if data in leave then Y otherwise N
