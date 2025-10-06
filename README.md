@@ -29,6 +29,17 @@
     WHERE C_NO = '8' AND WO_NO = '4700023110' AND RIGHT(V_CODE,5) = '14494'
 ),
 
+-- Normalize BonusData BONUS_YEAR to an integer start year to avoid varchar->int conversion errors
+BonusDataNorm AS (
+    SELECT 
+        VendorCode,
+        WorkOrder,
+        Bonus_compliance,
+        -- take left 4 chars of BONUS_YEAR (works if BONUS_YEAR = '2023' or '2023-2024' or numeric)
+        TRY_CAST(LEFT(CAST(BONUS_YEAR AS VARCHAR(20)), 4) AS INT) AS BONUS_YEAR_INT
+    FROM BonusData
+),
+
 WorkOrderRange AS (
     SELECT 
         VW.WO_NO,
@@ -45,7 +56,6 @@ WorkOrderRange AS (
     WHERE VW.WO_NO = '4700023110' AND VW.V_CODE = '14494'
 ),
 
--- Generate list of financial years
 YearSeries AS (
     SELECT 
         WO_NO,
@@ -79,25 +89,27 @@ Recognised AS (
 
 SELECT 
     FORMAT(GETDATE(), 'dd-MM-yyyy') AS CURR_MONTH,
+    -- format for display, keep internal year numeric for logic
     CONCAT(CAST(YS.Financial_Year_Start AS VARCHAR(4)), '-', CAST(YS.Financial_Year_Start + 1 AS VARCHAR(4))) AS BONUS_YEAR,
     YS.WO_NO AS WorkOrder,
     YS.V_CODE AS VendorCode,
     YS.V_NAME AS VendorName,
     CASE 
-        WHEN R.WO_NO IS NOT NULL THEN 'Y'
-        WHEN MAX(B.Bonus_compliance) = 'Y' THEN 'Y'
+        WHEN R.WO_NO IS NOT NULL THEN 'Y'                           -- recognised => Y
+        WHEN MAX(BN.Bonus_compliance) = 'Y' THEN 'Y'                -- any source says Y => Y
         ELSE 'N'
     END AS Bonus_compliance,
     FORMAT(YS.START_DATE, 'dd-MM-yyyy') AS start_date,
     FORMAT(YS.END_DATE, 'dd-MM-yyyy') AS end_date
 FROM YearSeries YS
-LEFT JOIN BonusData B 
-    ON B.WorkOrder = YS.WO_NO 
-    AND B.VendorCode = RIGHT(YS.V_CODE, 5)
-    AND B.BONUS_YEAR = YS.Financial_Year_Start
+LEFT JOIN BonusDataNorm BN 
+    ON BN.WorkOrder = YS.WO_NO
+    -- compare vendor codes by their last 5 digits safely as varchar
+    AND RIGHT(CAST(YS.V_CODE AS VARCHAR(20)),5) = RIGHT(CAST(BN.VendorCode AS VARCHAR(20)),5)
+    -- IMPORTANT: compare normalized integer year to avoid conversion errors
+    AND BN.BONUS_YEAR_INT = YS.Financial_Year_Start
 LEFT JOIN Recognised R ON R.WO_NO = YS.WO_NO
 GROUP BY 
-    YS.Financial_Year_Start, YS.WO_NO, YS.V_CODE, YS.V_NAME, 
-    YS.START_DATE, YS.END_DATE, R.WO_NO
+    YS.Financial_Year_Start, YS.WO_NO, YS.V_CODE, YS.V_NAME, YS.START_DATE, YS.END_DATE, R.WO_NO
 ORDER BY YS.Financial_Year_Start
 OPTION (MAXRECURSION 1000);
