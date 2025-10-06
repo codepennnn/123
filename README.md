@@ -1,5 +1,5 @@
 WITH YearRange AS (
-    -- Generate years from START_DATE to END_DATE
+    -- Generate one record per year from START_DATE to END_DATE
     SELECT 
         VW.WO_NO AS WorkOrder,
         VW.V_CODE AS VendorCode,
@@ -25,12 +25,12 @@ WITH YearRange AS (
 ),
 
 LeaveData AS (
-    -- Your existing leave union logic
+    -- Combine all sources of leave data
     select distinct 
         D.V_Code as VendorCode,
         D.year as Leave_Year,
         D.WorkOrderNo as WorkOrder,
-        ISNULL(case when S.Status = 'Request Closed' then 'Y' else 'N' end, 'N') as Leave_compliance
+        ISNULL(case when S.Status = 'Request Closed' then 'Y' else 'N' end,'N') as Leave_compliance
     from App_Leave_Comp_Details D
     left join App_Leave_Comp_Summary S on S.ID = D.MasterID
     where D.WorkOrderNo = '4700022119' and D.V_Code = '17077'
@@ -62,8 +62,11 @@ SELECT
     YR.WorkOrder,
     YR.VendorCode,
     YR.VendorName,
-    -- ✅ if leave data exists for year → Y else N
-    ISNULL(MAX(LD.Leave_compliance), 'N') as Leave_compliance,
+    CASE 
+        WHEN R.WO_NO IS NOT NULL THEN 'Y'           -- ✅ recognized → Y
+        WHEN MAX(LD.Leave_compliance) = 'Y' THEN 'Y'-- ✅ leave data → Y
+        ELSE 'N'                                   -- ❌ otherwise N
+    END AS Leave_compliance,
     FORMAT(YR.START_DATE, 'dd-MM-yyyy') as start_date,
     FORMAT(YR.END_DATE, 'dd-MM-yyyy') as end_date
 FROM YearRange YR
@@ -71,12 +74,15 @@ LEFT JOIN LeaveData LD
     ON LD.WorkOrder = YR.WorkOrder 
     AND LD.VendorCode = YR.VendorCode 
     AND LD.Leave_Year = YR.Leave_Year
+LEFT JOIN APP_RECOGNIZED_WO R 
+    ON R.WO_NO = YR.WorkOrder                    -- ✅ recognition check
 GROUP BY 
     YR.Leave_Year, 
     YR.WorkOrder, 
     YR.VendorCode, 
     YR.VendorName, 
     YR.START_DATE, 
-    YR.END_DATE
+    YR.END_DATE,
+    R.WO_NO
 ORDER BY YR.Leave_Year
 OPTION (MAXRECURSION 1000);
