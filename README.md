@@ -45,6 +45,7 @@ WorkOrderRange AS (
     WHERE VW.WO_NO = '4700023110' AND VW.V_CODE = '14494'
 ),
 
+-- Generate list of financial years
 YearSeries AS (
     SELECT 
         WO_NO,
@@ -52,18 +53,20 @@ YearSeries AS (
         V_NAME,
         START_DATE,
         END_DATE,
-        Financial_Year_Start AS BONUS_YEAR
+        Financial_Year_Start
     FROM WorkOrderRange
+
     UNION ALL
+
     SELECT 
         WO_NO,
         V_CODE,
         V_NAME,
         START_DATE,
         END_DATE,
-        BONUS_YEAR + 1
+        Financial_Year_Start + 1
     FROM YearSeries
-    WHERE BONUS_YEAR + 1 <= 
+    WHERE Financial_Year_Start + 1 <= 
           CASE 
               WHEN MONTH(END_DATE) >= 4 THEN YEAR(END_DATE)
               ELSE YEAR(END_DATE) - 1 
@@ -76,7 +79,7 @@ Recognised AS (
 
 SELECT 
     FORMAT(GETDATE(), 'dd-MM-yyyy') AS CURR_MONTH,
-    YS.BONUS_YEAR AS BONUS_YEAR,
+    CONCAT(CAST(YS.Financial_Year_Start AS VARCHAR(4)), '-', CAST(YS.Financial_Year_Start + 1 AS VARCHAR(4))) AS BONUS_YEAR,
     YS.WO_NO AS WorkOrder,
     YS.V_CODE AS VendorCode,
     YS.V_NAME AS VendorName,
@@ -88,12 +91,13 @@ SELECT
     FORMAT(YS.START_DATE, 'dd-MM-yyyy') AS start_date,
     FORMAT(YS.END_DATE, 'dd-MM-yyyy') AS end_date
 FROM YearSeries YS
-LEFT JOIN BonusData B ON 
-    B.WorkOrder = YS.WO_NO 
+LEFT JOIN BonusData B 
+    ON B.WorkOrder = YS.WO_NO 
     AND B.VendorCode = RIGHT(YS.V_CODE, 5)
-    AND B.BONUS_YEAR = YS.BONUS_YEAR
+    AND B.BONUS_YEAR = YS.Financial_Year_Start
 LEFT JOIN Recognised R ON R.WO_NO = YS.WO_NO
 GROUP BY 
-    YS.BONUS_YEAR, YS.WO_NO, YS.V_CODE, YS.V_NAME, YS.START_DATE, YS.END_DATE, R.WO_NO
-ORDER BY YS.BONUS_YEAR
+    YS.Financial_Year_Start, YS.WO_NO, YS.V_CODE, YS.V_NAME, 
+    YS.START_DATE, YS.END_DATE, R.WO_NO
+ORDER BY YS.Financial_Year_Start
 OPTION (MAXRECURSION 1000);
