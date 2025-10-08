@@ -1,9 +1,11 @@
-public List<(string WorkOrderNo, DateTime ApprovedOn, int ExemptionCC)> GetWorkOrdersInExemptionPeriod(string workOrder)
+public List<string> GetWorkOrdersInExemptionPeriod(string workOrder)
 {
     string sql = @"
-        SELECT w.WorkOrderNo, w.Approved_On, w.Exemption_CC 
-        FROM App_WorkOrder_Exemption AS w 
-        WHERE w.Status = 'Approved' 
+        SELECT w.WorkOrderNo, 
+               CONVERT(varchar(10), w.Approved_On, 105) AS Approved_On, 
+               w.Exemption_CC
+        FROM App_WorkOrder_Exemption AS w
+        WHERE w.Status = 'Approved'
           AND DATEDIFF(DAY, w.Approved_On, GETDATE()) <= w.Exemption_CC
           AND (
                w.WorkOrderNo = @workOrder
@@ -13,49 +15,31 @@ public List<(string WorkOrderNo, DateTime ApprovedOn, int ExemptionCC)> GetWorkO
           );
     ";
 
-    Dictionary<string, object> objParam = new Dictionary<string, object>
-    {
-        { "workOrder", workOrder }
-    };
+    Dictionary<string, object> objParam = new Dictionary<string, object>();
+    objParam.Add("workOrder", workOrder);
 
     DataHelper dh = new DataHelper();
     DataSet ds = dh.GetDataset(sql, "App_WorkOrder_Exemption", objParam);
 
+    // ✅ Return combined string (work order + date + cc)
     return ds.Tables[0]
              .AsEnumerable()
-             .Select(r => (
-                 WorkOrderNo: r.Field<string>("WorkOrderNo"),
-                 ApprovedOn: r.Field<DateTime>("Approved_On"),
-                 ExemptionCC: r.Field<int>("Exemption_CC")
-             ))
+             .Select(r => $"{r.Field<string>("WorkOrderNo")} (Approved On: {r.Field<string>("Approved_On")}, Exemption CC: {r.Field<int>("Exemption_CC")})")
              .ToList();
 }
 
 
 
 
-
-
-
-string[] workOrders = PageRecordDataSet.Tables["App_WorkOrder_Exemption"]
-                             .Rows[0]["WorkOrderNo"]
-                             .ToString()
-                             .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
 foreach (string wo in workOrders)
 {
-    var conflicts = blobj.GetWorkOrdersInExemptionPeriod(wo.Trim());
+    List<string> conflicts = blobj.GetWorkOrdersInExemptionPeriod(wo.Trim());
 
     if (conflicts.Any())
     {
-        string joined = string.Join(Environment.NewLine, 
-            conflicts.Select(c => 
-                $"{c.WorkOrderNo} (Approved On: {c.ApprovedOn:dd-MMM-yyyy}, Exemption CC: {c.ExemptionCC} days)"
-            )
-        );
-
+        string joined = string.Join(", ", conflicts);
         MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors,
-            $"The following work orders are already approved and still within the exemption period:\n\n{joined}\n\nDuplicate not allowed!");
+            $"The following work orders are already approved and still within the exemption period: {joined}. Duplicate not allowed!");
         return;
     }
 }
