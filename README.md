@@ -1,16 +1,43 @@
-<script type="text/javascript">
-function toggleBlockDates(dropdown) {
-    var fromDiv = document.getElementById("blockFromDiv");
-    var toDiv = document.getElementById("blockToDiv");
+protected void Block_unblock_SelectedIndexChanged(object sender, EventArgs e)
+{
+    // The dropdown that triggered the event
+    DropDownList ddl = (DropDownList)sender;
 
-    if (!fromDiv || !toDiv) return;
+    // Get the template container of this dropdown
+    Control container = ddl.NamingContainer;
 
-    if (dropdown.value === "RFQ_U") { // Unblock selected
-        fromDiv.style.display = "none";
-        toDiv.style.display = "none";
-    } else { // Block or default
-        fromDiv.style.display = "block";
-        toDiv.style.display = "block";
+    // Get the selected value
+    string Type = ddl.SelectedValue;
+
+    // Refresh Reason dropdown
+    Dictionary<string, object> ddlParams = new Dictionary<string, object>();
+    ddlParams.Add("type", Type);
+    DropDownList ddlReason = (DropDownList)container.FindControl("Reason");
+    if (ddlReason != null)
+    {
+        GetDropdowns("RFQ_Reason", ddlParams);
+        ddlReason.DataBind();
+    }
+
+    // Find the divs inside the same container
+    System.Web.UI.HtmlControls.HtmlGenericControl blockFromDiv =
+        container.FindControl("blockFromDiv") as System.Web.UI.HtmlControls.HtmlGenericControl;
+
+    System.Web.UI.HtmlControls.HtmlGenericControl blockToDiv =
+        container.FindControl("blockToDiv") as System.Web.UI.HtmlControls.HtmlGenericControl;
+
+    // Set visibility
+    if (blockFromDiv != null && blockToDiv != null)
+    {
+        if (Type == "RFQ_U")  // Unblock
+        {
+            blockFromDiv.Visible = false;
+            blockToDiv.Visible = false;
+        }
+        else
+        {
+            blockFromDiv.Visible = true;
+            blockToDiv.Visible = true;
+        }
     }
 }
-</script>
