@@ -1,149 +1,92 @@
-
-                if (e.Row.Cells[9].Text.Trim() != "" && e.Row.Cells[9].Text.Trim() != null && e.Row.Cells[9].Text.Trim() != "&nbsp;")
-                {
-                    e.Row.Cells[9].Text = (Convert.ToDateTime(e.Row.Cells[9].Text)).ToString("dd-MM-yyyy");
-                }
-
-                if (e.Row.Cells[10].Text.Trim() != "" && e.Row.Cells[10].Text.Trim() != null && e.Row.Cells[9].Text.Trim() != "&nbsp;")
-                {
-                    e.Row.Cells[10].Text = (Convert.ToDateTime(e.Row.Cells[10].Text)).ToString("dd-MM-yyyy");
-                }
+                  <div class="form-inline row">
 
 
-
-                if (e.Row.Cells[12].Text.Trim() != "" && e.Row.Cells[12].Text.Trim() != null && e.Row.Cells[12].Text.Trim() != "&nbsp;")
-                {
-                    e.Row.Cells[12].Text = (Convert.ToDateTime(e.Row.Cells[12].Text)).ToString("dd-MM-yyyy");
-                }
-
-
- <cc1:DetailsContainer ID="Vendor_Block_Unblock_RFQ_recordsGrid" runat="server" AutoGenerateColumns="False"
-     OnRowDataBound="Vendor_Block_Unblock_RFQ_recordsGrid_RowDataBound"
-     AllowPaging="false" CellPadding="4" GridLines="None" Width="120%" DataMember="App_RFQ_Block_Unblock"
-     DataKeyNames="ID" DataSource="<%# PageRecordsDataSet %>"
-     ForeColor="#333333" ShowHeaderWhenEmpty="True"
-     PageSize="8" PagerSettings-Visible="True" PagerStyle-HorizontalAlign="Center"
-     PagerStyle-Wrap="false" HeaderStyle-Font-Size="Smaller" RowStyle-Font-Size="Smaller">
-     <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
-     <Columns>
-         <asp:TemplateField HeaderText="ID" SortExpression="ID" Visible="false">
-             <ItemTemplate>
-                 <asp:Label ID="ID" runat="server" Visible="False"></asp:Label>
-             </ItemTemplate>
-         </asp:TemplateField>
-
-         <asp:TemplateField HeaderText="Sl No." SortExpression="Sl_No"
-             HeaderStyle-Width="50px" HeaderStyle-HorizontalAlign="Left" ItemStyle-HorizontalAlign="Left">
-             <ItemTemplate><%# Container.DataItemIndex + 1 + "."%></ItemTemplate>
-         </asp:TemplateField>
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="V_Code" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">Vendor Code:</asp:Label>
+                          <asp:TextBox ID="V_Code" runat="server" autocomplete="off"  CssClass="form-control form-control-sm col-sm-8" OnTextChanged="V_Code_TextChanged" AutoPostBack="true" ></asp:TextBox>
+                      </div>
 
 
-            <asp:BoundField DataField="Createdon" HeaderText="Action Date" ItemStyle-Width="150px"
-            SortExpression="Createdon" HeaderStyle-HorizontalAlign="Left"
-            ItemStyle-HorizontalAlign="Left">
-            <HeaderStyle HorizontalAlign="Left" />
-            <ItemStyle HorizontalAlign="Left" />
-        </asp:BoundField>
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="V_Name" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">Vendor Name:</asp:Label>
+                          <asp:TextBox ID="V_Name" runat="server" CssClass="form-control form-control-sm col-sm-8" Enabled="false"></asp:TextBox>
+                      </div>
+
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="Block_unblock" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">Block/unblock:</asp:Label>
+                          <asp:DropDownList ID="Block_unblock" runat="server"
+                              CssClass="form-control form-control-sm col-sm-8"
+                              OnSelectedIndexChanged="Block_unblock_SelectedIndexChanged"
+                              AutoPostBack="true">
+
+                              <asp:ListItem Text="--Select--" Value="M"></asp:ListItem>
+                              <asp:ListItem Text="Block" Value="RFQ_B"></asp:ListItem>
+                              <asp:ListItem Text="Unblock" Value="RFQ_U"></asp:ListItem>
+                          </asp:DropDownList>
+                      </div>
 
 
 
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="Email" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">Vendor Email:</asp:Label>
+                          <asp:TextBox ID="Email" runat="server" CssClass="form-control form-control-sm col-sm-8" Enabled="false"></asp:TextBox>
+                      </div>
 
 
-         <asp:BoundField DataField="V_Code" HeaderText="Vendor Code"
-             SortExpression="V_Code" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
-
-         <asp:BoundField DataField="V_NAME" HeaderText="Vendor Name"
-             SortExpression="V_Name" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
-         <asp:BoundField DataField="Email" HeaderText="Vendor Email"
-             SortExpression="Email" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
-         <asp:BoundField DataField="CONTACT_NO" HeaderText="Contact No."
-             SortExpression="CONTACT_NO" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
-         <asp:BoundField DataField="Reason" HeaderText="Reason"
-             SortExpression="Reason" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
-         <asp:BoundField DataField="Status" HeaderText="Status"
-             SortExpression="Status" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
-
-         <asp:BoundField DataField="Internal_Remarks" HeaderText="Remarks"
-             SortExpression="Internal_Remarks" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
-
-
-         <asp:BoundField DataField="Block_From" HeaderText="From Date" ItemStyle-Width="200px"
-             SortExpression="Block_From" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
+<%--                      <div class="form-group col-md-4 col-margin mb-1">
+                           <asp:Label for="CONTACT_NO" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">Vendor CONTACT_NO:</asp:Label>
+                         <asp:TextBox ID="CONTACT_NO" runat="server" CssClass="form-control form-control-sm col-sm-8" Enabled="false"></asp:TextBox>
+                    </div>--%>
 
 
 
-         <asp:BoundField DataField="Block_To" HeaderText="To Date" ItemStyle-Width="200px"
-             SortExpression="Block_To" HeaderStyle-HorizontalAlign="Left"
-             ItemStyle-HorizontalAlign="Left">
-             <HeaderStyle HorizontalAlign="Left" />
-             <ItemStyle HorizontalAlign="Left" />
-         </asp:BoundField>
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="Reason" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">Reason:</asp:Label>
+                          <asp:DropDownList ID="Reason" runat="server"
+                               DataMember="RFQ_Reason" 
+
+                              DataTextField="Reason"
+                              DataValueField="Reason" 
+
+                              AutoPostBack="true"
+                              DataSource="<%# PageDDLDataset %>" 
+                              CssClass="form-control form-control-sm col-sm-8"
+                              OnSelectedIndexChanged="Reason_SelectedIndexChanged"
+                             ></asp:DropDownList>
+                          <asp:TextBox ID="Status" runat="server" CssClass="form-control form-control-sm col-sm-8" Visible="false"></asp:TextBox>
+                      </div>
+
+
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="Internal_Remarks" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">Remarks:</asp:Label>
+                          <asp:TextBox ID="Internal_Remarks" runat="server" autocomplete="off"  CssClass="form-control form-control-sm col-sm-8" Rows="2" TextMode="MultiLine"></asp:TextBox>
+                      </div>
 
 
 
 
 
-            <asp:TemplateField HeaderText="For Department Purpose" SortExpression="Attachment_Dept" >
-                                 <ItemTemplate>
-                                     <asp:BulletedList runat="server" ID="Attachment_Dept" CssClass="attachment-list" DisplayMode="HyperLink" OnClick="Attachment_Dept_Click" />
-                                 </ItemTemplate>
-                             </asp:TemplateField> 
+
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="Block_From" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6"> From Date :</asp:Label>
+                          <asp:TextBox ID="Block_From" runat="server" autocomplete="off" CssClass="form-control form-control-sm col-sm-8"></asp:TextBox>
+                          <ask:CalendarExtender ID="CalendarExtender1" runat="server" Enabled="True" Format="dd/MM/yyyy" PopupPosition="TopRight" TargetControlID="Block_From" TodaysDateFormat="dd/MM/yyyy"></ask:CalendarExtender>
+                      </div>
 
 
-                           <%--   <asp:TemplateField HeaderText="For Vendor Purpose" SortExpression="Attachment_Vendor" >
-                                 <ItemTemplate>
-                                     <asp:BulletedList runat="server" CssClass="attachment-list" ID="Attachment_VendorLink" DisplayMode="HyperLink"/>
-                                 </ItemTemplate>
-                             </asp:TemplateField> --%>
-
-
-      
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="Block_To" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">To Date:</asp:Label>
+                          <asp:TextBox ID="Block_To" runat="server"  autocomplete="off"  CssClass="form-control form-control-sm col-sm-8"></asp:TextBox>
+                          <ask:CalendarExtender ID="CalendarExtender2" runat="server" Enabled="True" Format="dd/MM/yyyy" PopupPosition="TopRight" TargetControlID="Block_To" TodaysDateFormat="dd/MM/yyyy"></ask:CalendarExtender>
+                      </div>
 
 
 
-     </Columns>
-     <EditRowStyle BackColor="#999999" />
-     <FooterStyle BackColor="#5D7B9D" ForeColor="White" Font-Bold="True" />
-     <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
-     <PagerSettings Mode="Numeric" />
-     <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" Font-Bold="True" CssClass="pager1" />
-     <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" />
-     <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
-     <SelectedRowStyle BackColor="#E2DED6" Font-Bold="true" ForeColor="#333333" />
-     <SortedAscendingCellStyle BackColor="#E9E7E2" />
-     <SortedAscendingHeaderStyle BackColor="#506C8C" />
-     <SortedDescendingCellStyle BackColor="#FFFDF8" />
-     <SortedDescendingHeaderStyle BackColor="#6F8DAE" />
- </cc1:DetailsContainer>
+
+                      <div class="form-group col-md-4 col-margin mb-1">
+                          <asp:Label for="Createdon" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">Action Date:</asp:Label>
+                          <asp:TextBox ID="Createdon" runat="server" CssClass="form-control form-control-sm col-sm-8" Enabled="false"></asp:TextBox>
+                      </div>
+
+
+                  </div>
