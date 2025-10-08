@@ -1,43 +1,28 @@
-protected void Block_unblock_SelectedIndexChanged(object sender, EventArgs e)
-{
-    // The dropdown that triggered the event
-    DropDownList ddl = (DropDownList)sender;
 
-    // Get the template container of this dropdown
-    Control container = ddl.NamingContainer;
+                                    <div runat="server" id="blockFromDiv" class="form-group col-md-4 col-margin mb-1">
+                                        <asp:Label for="Block_From" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-4 font-weight-bold fs-6"> From Date :</asp:Label>
+                                        <asp:TextBox ID="Block_From" runat="server" autocomplete="off" CssClass="form-control form-control-sm col-sm-7"></asp:TextBox>
+                                        <ask:CalendarExtender ID="CalendarExtender1" runat="server" Enabled="True" Format="dd/MM/yyyy" PopupPosition="TopRight" TargetControlID="Block_From" TodaysDateFormat="dd/MM/yyyy"></ask:CalendarExtender>
+                                    </div>
 
-    // Get the selected value
-    string Type = ddl.SelectedValue;
 
-    // Refresh Reason dropdown
-    Dictionary<string, object> ddlParams = new Dictionary<string, object>();
-    ddlParams.Add("type", Type);
-    DropDownList ddlReason = (DropDownList)container.FindControl("Reason");
-    if (ddlReason != null)
-    {
-        GetDropdowns("RFQ_Reason", ddlParams);
-        ddlReason.DataBind();
-    }
+                                    <div  runat="server" id="blockToDiv" class="form-group col-md-4 col-margin mb-1">
+                                        <asp:Label for="Block_To" runat="server" CssClass="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6">To Date:</asp:Label>
+                                        <asp:TextBox ID="Block_To" runat="server"  autocomplete="off"  CssClass="form-control form-control-sm col-sm-8"></asp:TextBox>
+                                        <ask:CalendarExtender ID="CalendarExtender2" runat="server" Enabled="True" Format="dd/MM/yyyy" PopupPosition="TopRight" TargetControlID="Block_To" TodaysDateFormat="dd/MM/yyyy"></ask:CalendarExtender>
+                                    </div>
 
-    // Find the divs inside the same container
-    System.Web.UI.HtmlControls.HtmlGenericControl blockFromDiv =
-        container.FindControl("blockFromDiv") as System.Web.UI.HtmlControls.HtmlGenericControl;
 
-    System.Web.UI.HtmlControls.HtmlGenericControl blockToDiv =
-        container.FindControl("blockToDiv") as System.Web.UI.HtmlControls.HtmlGenericControl;
+  if (Type == "RFQ_U")
+  {
+      ((TextBox)Vendor_Block_Unblock_RFQ_record.Rows[0].FindControl("Block_From")).Visible = false;
+      ((TextBox)Vendor_Block_Unblock_RFQ_record.Rows[0].FindControl("Block_To")).Visible = false;
 
-    // Set visibility
-    if (blockFromDiv != null && blockToDiv != null)
-    {
-        if (Type == "RFQ_U")  // Unblock
-        {
-            blockFromDiv.Visible = false;
-            blockToDiv.Visible = false;
-        }
-        else
-        {
-            blockFromDiv.Visible = true;
-            blockToDiv.Visible = true;
-        }
-    }
-}
+
+  }
+  else
+  {
+
+      ((TextBox)Vendor_Block_Unblock_RFQ_record.Rows[0].FindControl("Block_From")).Visible = true;
+      ((TextBox)Vendor_Block_Unblock_RFQ_record.Rows[0].FindControl("Block_To")).Visible = true;
+  }
