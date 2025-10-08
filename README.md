@@ -1,16 +1,16 @@
-var blockFromDiv = container.FindControl("blockFromDiv") as HtmlGenericControl;
-    var blockToDiv = container.FindControl("blockToDiv") as HtmlGenericControl;
+<script type="text/javascript">
+function toggleBlockDates(dropdown) {
+    var fromDiv = document.getElementById("blockFromDiv");
+    var toDiv = document.getElementById("blockToDiv");
 
-    if (blockFromDiv != null && blockToDiv != null)
-    {
-        // Hide when Unblock selected
-        if (Type == "RFQ_U")
-        {
-            blockFromDiv.Visible = false;
-            blockToDiv.Visible = false;
-        }
-        else
-        {
-            blockFromDiv.Visible = true;
-            blockToDiv.Visible = true;
-        }
+    if (!fromDiv || !toDiv) return;
+
+    if (dropdown.value === "RFQ_U") { // Unblock selected
+        fromDiv.style.display = "none";
+        toDiv.style.display = "none";
+    } else { // Block or default
+        fromDiv.style.display = "block";
+        toDiv.style.display = "block";
+    }
+}
+</script>
