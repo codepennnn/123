@@ -1,14 +1,16 @@
-var blockFromDiv = (HtmlGenericControl)row.FindControl("blockFromDiv");
-    var blockToDiv = (HtmlGenericControl)row.FindControl("blockToDiv");
+var blockFromDiv = container.FindControl("blockFromDiv") as HtmlGenericControl;
+    var blockToDiv = container.FindControl("blockToDiv") as HtmlGenericControl;
 
-    // Hide or show based on selection
-    if (Type == "RFQ_U")  // Unblock
+    if (blockFromDiv != null && blockToDiv != null)
     {
-        blockFromDiv.Visible = false;
-        blockToDiv.Visible = false;
-    }
-    else // Block
-    {
-        blockFromDiv.Visible = true;
-        blockToDiv.Visible = true;
-    }
+        // Hide when Unblock selected
+        if (Type == "RFQ_U")
+        {
+            blockFromDiv.Visible = false;
+            blockToDiv.Visible = false;
+        }
+        else
+        {
+            blockFromDiv.Visible = true;
+            blockToDiv.Visible = true;
+        }
