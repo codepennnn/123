@@ -1,40 +1,14 @@
-protected void Page_Load(object sender, EventArgs e)
-{
-    if (!IsPostBack)
-    {
-        CheckBocwApplicable();
-    }
-}
+   DataSet ds = new DataSet();
+   BL_Vendorwodetails blobj = new BL_Vendorwodetails();
 
-private void CheckBocwApplicable()
-{
-    // Database se value uthaiye
-    int bocwApplicableAsPerMatrix = GetBocwApplicableAsPerMatrix(); // <-- apna method yahaan call karein
 
-    // Textbox ka value uthaiye
-    int bocwApplicableTextbox = 0;
-    int.TryParse(BOCW_APPLICABLE.Text, out bocwApplicableTextbox);
+   string Loc_code = ((TextBox)vendor_wo_Record.Rows[0].FindControl("LOC_CODE")).Text;
+   string Service_Code = ((TextBox)vendor_wo_Record.Rows[0].FindControl("SERVICE_CODE")).Text;
 
-    // Check condition
-    if (bocwApplicableAsPerMatrix == 2 && bocwApplicableTextbox == 2)
-    {
-        // Enable fields
-        REGIS_NUMBER.Enabled = true;
-        REGIS_DATE.Enabled = true;
-        REGIS_VALID_UPTO.Enabled = true;
-        NO_EMP_BOCW_OBTAINED.Enabled = true;
 
-        // Required validators enable kar do (agar lagaye hain)
-        CustomValidator19.Enabled = true;
-    }
-    else
-    {
-        // Disable fields
-        REGIS_NUMBER.Enabled = false;
-        REGIS_DATE.Enabled = false;
-        REGIS_VALID_UPTO.Enabled = false;
-        NO_EMP_BOCW_OBTAINED.Enabled = false;
+   ds = blobj.GetBocwApplicableAsPerMatrix(Loc_code, Service_Code);
 
-        CustomValidator19.Enabled = false;
-    }
-}
+   bocw_chk = ((TextBox)vendor_wo_Record.Rows[0].FindControl("BOCW_APPLICABLE")).Text;
+
+   PageRecordDataSet.Tables["App_WorkOrder_Reg"].Rows[0]["BOCW_APPLICABLE_AS_PER"];
+
