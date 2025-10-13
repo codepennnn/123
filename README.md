@@ -2,38 +2,39 @@ protected void Page_Load(object sender, EventArgs e)
 {
     if (!IsPostBack)
     {
-        CheckBocwApplicability();
+        CheckBocwApplicable();
     }
 }
 
-private void CheckBocwApplicability()
+private void CheckBocwApplicable()
 {
-    // Example: you fetch bocw_applicable_as_per_matrix from database
-    int bocwApplicableMatrix = GetBocwApplicableAsPerMatrix(); // your method
-    int bocwApplicableInput = 0;
+    // Database se value uthaiye
+    int bocwApplicableAsPerMatrix = GetBocwApplicableAsPerMatrix(); // <-- apna method yahaan call karein
 
-    // Try to get BOCW_APPLICABLE textbox value
-    int.TryParse(BOCW_APPLICABLE.Text, out bocwApplicableInput);
+    // Textbox ka value uthaiye
+    int bocwApplicableTextbox = 0;
+    int.TryParse(BOCW_APPLICABLE.Text, out bocwApplicableTextbox);
 
-    // Check if both are 2
-    if (bocwApplicableMatrix == 2 && bocwApplicableInput == 2)
+    // Check condition
+    if (bocwApplicableAsPerMatrix == 2 && bocwApplicableTextbox == 2)
     {
-        EnableAndRequireBocwFields(true);
+        // Enable fields
+        REGIS_NUMBER.Enabled = true;
+        REGIS_DATE.Enabled = true;
+        REGIS_VALID_UPTO.Enabled = true;
+        NO_EMP_BOCW_OBTAINED.Enabled = true;
+
+        // Required validators enable kar do (agar lagaye hain)
+        CustomValidator19.Enabled = true;
     }
     else
     {
-        EnableAndRequireBocwFields(false);
+        // Disable fields
+        REGIS_NUMBER.Enabled = false;
+        REGIS_DATE.Enabled = false;
+        REGIS_VALID_UPTO.Enabled = false;
+        NO_EMP_BOCW_OBTAINED.Enabled = false;
+
+        CustomValidator19.Enabled = false;
     }
-}
-
-private void EnableAndRequireBocwFields(bool enable)
-{
-    // Enable/disable relevant controls
-    REGIS_NUMBER.Enabled = enable;
-    REGIS_DATE.Enabled = enable;
-    REGIS_VALID_UPTO.Enabled = enable;
-    NO_EMP_BOCW_OBTAINED.Enabled = enable;
-
-    // Optional: set required validators dynamically
-    CustomValidator19.Enabled = enable;
 }
