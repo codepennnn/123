@@ -1,56 +1,39 @@
-    <div class="col-lg-4 mb-1 form-row">
-        <div class="col-lg-5">
-            <label class="m-0 mr-2 p-0 col-form-label-sm  font-weight-bold fs-6">Bocw Applicable Number :<span class="text-danger"></span></label>
-        </div>
-        <div class="col-lg-7">
-            <asp:TextBox ID="BOCW_APPLICABLE" Enabled="false" runat="server" CssClass="form-control form-control-sm textboxstyle" MaxLength="3" />
-            <asp:CustomValidator ID="CustomValidator19" ErrorMessage="Required" runat="server" ClientValidationFunction="Validate" ValidationGroup="Save" ControlToValidate="BOCW_APPLICABLE" ValidateEmptyText="true" BackColor="Wheat" ForeColor="Red"></asp:CustomValidator>
-        </div>
-    </div>
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (!IsPostBack)
+    {
+        CheckBocwApplicability();
+    }
+}
 
+private void CheckBocwApplicability()
+{
+    // Example: you fetch bocw_applicable_as_per_matrix from database
+    int bocwApplicableMatrix = GetBocwApplicableAsPerMatrix(); // your method
+    int bocwApplicableInput = 0;
 
-    <div class="col-lg-4 mb-1 form-row">
-        <div class="col-lg-5">
-            <label class="m-0 mr-2 p-0 col-form-label-sm  font-weight-bold fs-6">Bocw Registration Number :<span class="text-danger"></span></label>
-        </div>
-        <div class="col-lg-7">
-         
-            <asp:DropDownList ID="REGIS_NUMBER" runat="server" CssClass="form-control form-control-sm"
-                DataSource="<%# PageDDLDataset %>" DataMember="BOCW_Reg_No"
-                DataTextField="BOCW_RegNo" DataValueField="BOCW_RegNo"
-                OnSelectedIndexChanged="REGIS_NUMBER_SelectedIndexChanged"
-                AutoPostBack="true">
-            </asp:DropDownList>
-           
-        </div>
-    </div>
+    // Try to get BOCW_APPLICABLE textbox value
+    int.TryParse(BOCW_APPLICABLE.Text, out bocwApplicableInput);
 
-    <div class="col-lg-4 mb-1 form-row">
-        <div class="col-lg-5">
-            <label class="m-0 mr-2 p-0 col-form-label-sm  font-weight-bold fs-6">Bocw Registration Date :<span class="text-danger"></span></label>
-        </div>
-        <div class="col-lg-7">
-            <asp:TextBox ID="REGIS_DATE" runat="server" CssClass="form-control form-control-sm textboxstyle" Enabled="false" AutoComplete="off" />
-           
-        </div>
-    </div>
+    // Check if both are 2
+    if (bocwApplicableMatrix == 2 && bocwApplicableInput == 2)
+    {
+        EnableAndRequireBocwFields(true);
+    }
+    else
+    {
+        EnableAndRequireBocwFields(false);
+    }
+}
 
-    <div class="col-lg-4 mb-1 form-row">
-        <div class="col-lg-5">
-            <label class="m-0 mr-2 p-0 col-form-label-sm  font-weight-bold fs-6">Bocw Registration Valid Upto :<span class="text-danger"></span></label>
-        </div>
-        <div class="col-lg-7">
-            <asp:TextBox ID="REGIS_VALID_UPTO" runat="server" CssClass="form-control form-control-sm textboxstyle" Enabled="false" AutoComplete="off" />
-           
-        </div>
-    </div>
+private void EnableAndRequireBocwFields(bool enable)
+{
+    // Enable/disable relevant controls
+    REGIS_NUMBER.Enabled = enable;
+    REGIS_DATE.Enabled = enable;
+    REGIS_VALID_UPTO.Enabled = enable;
+    NO_EMP_BOCW_OBTAINED.Enabled = enable;
 
-    <div class="col-lg-4 mb-1 form-row">
-        <div class="col-lg-5">
-            <label class="m-0 mr-2 p-0 col-form-label-sm  font-weight-bold fs-6">Number of Employee for which Bocw obtained :<span class="text-danger"></span></label>
-        </div>
-        <div class="col-lg-7">
-            <asp:TextBox ID="NO_EMP_BOCW_OBTAINED" runat="server" CssClass="form-control form-control-sm textboxstyle" Enabled="false" TextMode="Number" placeholder="only Numbers" />
-          
-        </div>
-    </div>
+    // Optional: set required validators dynamically
+    CustomValidator19.Enabled = enable;
+}
