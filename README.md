@@ -1,2 +1,8 @@
- <asp:FileUpload ID="WO_ATTACH" runat="server" AllowMultiple="false" onchange="return ValidateFileExtension(this)" />
-  <asp:CustomValidator ID="CustomValidator005" ErrorMessage="Required" runat="server" ClientValidationFunction="Validate" ValidationGroup="Save" ControlToValidate="WO_ATTACH" ValidateEmptyText="true" BackColor="Wheat" ForeColor="Red"></asp:CustomValidator>
+SELECT RECEIPT_NO,
+       REGEXP_SUBSTR(RECEIPT_NO, '\d+$') AS EXTRACTED_NUMBER
+FROM CIDRDB.T_BOOKING_DETAILS
+WHERE TO_NUMBER(REGEXP_SUBSTR(RECEIPT_NO, '\d+$')) = (
+    SELECT MAX(TO_NUMBER(REGEXP_SUBSTR(RECEIPT_NO, '\d+$')))
+    FROM CIDRDB.T_BOOKING_DETAILS
+    WHERE REGEXP_LIKE(RECEIPT_NO, '\d+$')
+);
