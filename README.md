@@ -1,6 +1,6 @@
 SELECT LPAD(
          MAX(TO_NUMBER(REGEXP_SUBSTR(RECEIPT_NO, '\d+$'))),
-         MAX(LENGTH(REGEXP_SUBSTR(RECEIPT_NO, '\d+$'))),
+         6,
          '0'
        ) AS MAX_RECEIPT_NO
 FROM CIDRDB.T_BOOKING_DETAILS
