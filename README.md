@@ -17,3 +17,6 @@ and my checkbox like this -
                                   </ItemTemplate>
                            
                               </asp:TemplateField>
+and target or call id like this
+MainContent_bocw_summary_Subjective_balance_0
+MainContent_bocw_summary_Total_Base_Amount_0
