@@ -1,106 +1,66 @@
 <script type="text/javascript">
-    // Utility: safely parse numeric string
-    function parseNumberSafe(s) {
-        if (!s) return 0;
-        s = s.toString().replace(/,/g, '').replace(/[^\d.\-]/g, '');
-        var v = parseFloat(s);
-        return isNaN(v) ? 0 : v;
+// helper to parse number safely
+function parseNum(v) {
+    if (v === null || v === undefined || v === '') return 0;
+    // remove commas if used for formatting
+    v = v.toString().replace(/,/g, '');
+    var n = parseFloat(v);
+    return isNaN(n) ? 0 : n;
+}
+
+// Called when any row checkbox is clicked
+function updateTotals(chk) {
+    // find the container of the grid (adapt selector to your table structure)
+    // We'll search for all checkboxes with class 'wo-checkbox' within the container
+    var container = document.getElementById('<%= WorkOder_wise_records.ClientID %>');
+    if (!container) {
+        // fallback: search document
+        container = document;
     }
 
-    // Recalculate total of checked rows
-    function recalcSelectedTotal() {
-        var grid = document.getElementById('<%= WorkOder_wise_records.ClientID %>');
-        if (!grid) return;
-
-        var sum = 0;
-        var checks = grid.querySelectorAll('input[id$="chkSelect"][type="checkbox"]');
-
-        for (var i = 0; i < checks.length; i++) {
-            var chk = checks[i];
-            if (chk.checked) {
-                var tr = chk.closest('tr');
-                if (!tr) continue;
-
-                // Adjust class name according to your Base Amount cell span
-                var rmSpan = tr.querySelector('.rmwwr');
-                if (rmSpan) {
-                    var raw = rmSpan.textContent || rmSpan.innerText || '';
-                    sum += parseNumberSafe(raw);
-                }
+    var checks = container.querySelectorAll('.wo-checkbox');
+    var total = 0.0;
+    for (var i = 0; i < checks.length; i++) {
+        var c = checks[i];
+        if (c.checked) {
+            // find sibling hidden field hfAmount inside the same naming container (row)
+            // walk up the DOM to the row container (common ancestor)
+            var row = c.closest('[data-container]') || c.closest('tr') || c.parentElement;
+            // try to find hidden input inside that row
+            var hf = row ? row.querySelector('input[id$="hfAmount"]') : null;
+            if (!hf) {
+                // try global search by nearby elements
+                hf = c.parentElement.querySelector('input[id$="hfAmount"]') || document.querySelector('input[id$="hfAmount"]');
             }
-        }
-
-        // Update Total Base Amount
-        var totalInput = document.getElementById('MainContent_bocw_summary_Total_Base_Amount_0');
-        if (totalInput) totalInput.value = sum.toFixed(2);
-
-        // Update Subjective base amount
-        var subj = document.getElementById('MainContent_bocw_summary_Subjective_base_amount_0');
-        if (subj) subj.value = sum.toFixed(2);
-
-        // Update Cess amounts (1%)
-        var cess = (sum * 1) / 100;
-        var cessInput = document.getElementById('MainContent_bocw_summary_Cess_Amount_0');
-        if (cessInput) cessInput.value = cess.toFixed(2);
-        var subjCess = document.getElementById('MainContent_bocw_summary_Subjective_cess_amount_0');
-        if (subjCess) subjCess.value = cess.toFixed(2);
-
-        // Update Subjective Balance
-        var subjBalance = document.getElementById('MainContent_bocw_summary_Subjective_balance_0');
-        var prevOutstanding = document.getElementById('MainContent_bocw_summary_Subjective_Previous_outstanding_0');
-        if (subjBalance && prevOutstanding) {
-            subjBalance.value = (sum - parseNumberSafe(prevOutstanding.value)).toFixed(2);
+            var amt = hf ? hf.value : 0;
+            total += parseNum(amt);
         }
     }
 
-    // Handle header checkbox (Select All)
-    function checkAll(headerChk) {
-        var grid = document.getElementById('<%= WorkOder_wise_records.ClientID %>');
-        if (!grid) return;
-        var checks = grid.querySelectorAll('input[id$="chkSelect"][type="checkbox"]');
-        for (var i = 0; i < checks.length; i++) {
-            checks[i].checked = headerChk.checked;
-        }
-        recalcSelectedTotal();
-    }
+    // Update Total_Base_Amount and Cess_Amount textboxes (server controls)
+    // Use ClientID to address controls rendered by ASP.NET
+    var totalBox = document.getElementById('<%= Total_Base_Amount.ClientID %>');
+    var cessBox  = document.getElementById('<%= Cess_Amount.ClientID %>');
+    if (totalBox) totalBox.value = total.toFixed(2);
+    if (cessBox)  cessBox.value  = (total * 1/100).toFixed(2);
 
-    // Attach change event to each row checkbox
-    function wireRowCheckboxEvents() {
-        var grid = document.getElementById('<%= WorkOder_wise_records.ClientID %>');
-        if (!grid) return;
-        var checks = grid.querySelectorAll('input[id$="chkSelect"][type="checkbox"]');
-        for (var i = 0; i < checks.length; i++) {
-            checks[i].addEventListener('change', recalcSelectedTotal);
-        }
-    }
-
-    // Initialize on page load
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', wireRowCheckboxEvents);
-    } else {
-        wireRowCheckboxEvents();
-    }
-
-    // Re-attach events after partial postback (UpdatePanel)
-    if (typeof (Sys) !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
-        Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function () {
-            wireRowCheckboxEvents();
-        });
-    }
+    // If you want to update other fields like Subjective_base_amount etc:
+    var subjBase = document.getElementById('<%= Subjective_base_amount.ClientID %>');
+    var subjCess = document.getElementById('<%= Subjective_cess_amount.ClientID %>');
+    var subjBal  = document.getElementById('<%= Subjective_balance.ClientID %>');
+    if (subjBase) subjBase.value = total.toFixed(2);
+    if (subjCess) subjCess.value = (total * 1/100).toFixed(2);
+    if (subjBal)  subjBal.value  = (parseNum(subjBase ? subjBase.value : 0) - parseNum(subjCess ? subjCess.value : 0)).toFixed(2);
+}
 </script>
 
-<asp:TemplateField HeaderText="Select">
-    <HeaderTemplate>
-        <input type="checkbox" onclick="checkAll(this)" />
-    </HeaderTemplate>
-    <ItemTemplate>
-        <asp:CheckBox ID="chkSelect" runat="server" />
-    </ItemTemplate>
-</asp:TemplateField>
 
 
-<asp:TemplateField HeaderText="Base Amount">
-    <ItemTemplate>
-        <span class="rmwwr"><%# Eval("BaseAmount") %></span>
-    </ItemTemplate>
-</asp:TemplateField>
+<!-- inside your <ItemTemplate> for each row -->
+<asp:HiddenField ID="hfAmount" runat="server" Value='<%# Eval("RMWWR") %>' />
+<asp:HiddenField ID="hfKONNR" runat="server" Value='<%# Eval("KONNR") %>' />
+
+<asp:CheckBox ID="chkSelect" runat="server"
+    CssClass="wo-checkbox"
+    onclick="updateTotals(this);" />
+    
