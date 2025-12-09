@@ -1,79 +1,91 @@
-  protected void Search_Click(object sender, EventArgs e)
-  {
-      
-      BL_Half_Yearly blobj = new BL_Half_Yearly();
-      DataSet ds = new DataSet();
-      
+GO
+CREATE TRIGGER [dbo].[RefNo_Half_Yearly] 
+   ON  dbo.App_Half_Yearly_Details
+   INSTEAD OF INsert
+AS 
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+SELECT * INTO #Inserted FROM Inserted
+ 
+declare		@OutPut varchar(255)
 
-     
-          int year = Convert.ToInt32(Year.SelectedValue);
-          string month = SearchPeriod.SelectedValue.ToString();
-          string fromdt = "";
-          string todt = "";
-          string wageMonth = "";
-           string displayPeriod = "";
+EXEC	[dbo].[GetAutoNumberNoLeadingZero]
+		@p1=N'HALFYEARLY',
+		@OutPut = @OutPut OUTPUT
 
+     UPDATE #Inserted SET RefNo = @OutPut
+     INSERT INTO App_Half_Yearly_Details SELECT * FROM #Inserted
+    -- Insert statements for trigger here
 
-      if (month == "Jan-June")
-          {
-             wageMonth = "1,2,3,4,5,6";
-             fromdt = new DateTime(year, 1, 1).ToString("yyyy-MM-dd");
-              todt = new DateTime(year, 6, 30).ToString("yyyy-MM-dd");
+END
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    if (isExist)
+    {
+    
 
-          displayPeriod = $"Jan{year.ToString().Substring(2)} - June{year.ToString().Substring(2)}";
-      }
-          else
-          {
-              wageMonth = "7,8,9,10,11,12";
-              fromdt = new DateTime(year, 7, 1).ToString("yyyy-MM-dd");
-              todt = new DateTime(year, 12, 31).ToString("yyyy-MM-dd");
+        DataSet ds = new DataSet();
+        ds = blobj.GetDelete(vc, year, Period);
 
-          displayPeriod = $"July{year.ToString().Substring(2)} - Dec{year.ToString().Substring(2)}";
-      }
-          string vcode = Session["UserName"].ToString();
-          string Period = SearchPeriod.SelectedValue;
+        if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0].RowState.ToString() == "Modified")
+        {
 
+            string oldRef = dsExist.Tables[0].Rows[0]["RefNo"].ToString();
+            for (int i = 0; i < PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows.Count; i++)
+            {
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["VCode"] = Session["Username"].ToString();
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["Year"] = Year.SelectedValue;
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["Period"] = SearchPeriod.SelectedValue;
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["RefNo"] = oldRef;
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i].AcceptChanges();
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i].SetAdded();
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["CreatedBy"] = Session["UserName"].ToString();
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["CreatedOn"] = System.DateTime.Now;
 
-
-      DataSet dsStatus = blobj.GetStatus(vcode, Period, year);
-      if (dsStatus != null && dsStatus.Tables[0].Rows.Count > 0)
-      {
-          string status = dsStatus.Tables[0].Rows[0]["Status"].ToString();
-
-          if (status == "Approved" || status == "Pending With CC")
-          {
-              MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors,
-                             $"This record is already {status}. You cannot modify or upload again.");
-              HalfYearly_Records.Visible = false;
-               btnSave.Visible = false;
-              return;
-          }
-      }
-
-
-
-      ds = blobj.GetData(vcode, fromdt, todt, Period, year, wageMonth);
-
-      if (ds == null || ds.Tables[0].Rows.Count == 0)
-      {
-          PageRecordDataSet.Tables["App_Half_Yearly_Details"].Clear();
-          HalfYearly_Records.BindData();
-
-          MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors,
-              "No data found.");
-
-          return;
-      }
+            }
 
 
+        }
+    }
+    else
+    {
+        DataSet ds = new DataSet();
+        DataSet ds1 = new DataSet();
+        ds = blobj.GetDelete(vc, year, Period);
+
+    
+       // string refNo = blobj.Generate_Global_RefNo("HALFYEARLY");
+
+        if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0].RowState == DataRowState.Modified)
+        {
+
+            for (int i = 0; i < PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows.Count; i++)
+            {
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["VCode"] = Session["Username"].ToString();
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["Year"] = Year.SelectedValue;
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["Period"] = SearchPeriod.SelectedValue;
+            //    PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["RefNo"] = refNo;
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i].AcceptChanges();
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i].SetAdded();
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["CreatedBy"] = Session["UserName"].ToString();
+                PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["CreatedOn"] = System.DateTime.Now;
+
+            }
 
 
-
-           PageRecordDataSet.Tables["App_Half_Yearly_Details"].Clear();
-          PageRecordDataSet.Merge(ds);
-          HalfYearly_Records.BindData();
-          btnSave.Visible = true;
+        }
+    }
 
 
-
-  }
+    my triggered working fine for new entry but when exist already its again increment my refno that is not good please check code an do the needful
