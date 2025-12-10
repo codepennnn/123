@@ -1,107 +1,73 @@
   protected void btnSave_Click(object sender, EventArgs e)
   {
-      HalfYearly_Records.UnbindData();
-
-      PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["VCode"] = Session["Username"].ToString();
-      PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Year"] = Year.SelectedValue;
-      PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Period"] = SearchPeriod.SelectedValue;
-     
-
-      string vc = PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["VCode"].ToString();
-      string year = PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Year"].ToString();
-      string Period = PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Period"].ToString();
-
-
-
+      string vcode = Session["UserName"].ToString();
+      string period = SearchPeriod.SelectedValue;
+      string year = Year.SelectedValue;
       BL_Half_Yearly blobj = new BL_Half_Yearly();
-      DataSet dsExist = blobj.chkExist(vc, year, Period);
-      bool isExist = dsExist != null && dsExist.Tables[0].Rows.Count > 0;
 
-      if (isExist)
+      foreach (GridViewRow row in gvRefUpload.Rows)
       {
+          string lic = row.Cells[0].Text.Trim();
 
+          //string raw = WebUtility.HtmlDecode(row.Cells[0].Text);
+          //string lic = Regex.Replace(raw, "[^A-Za-z0-9]", "");
 
-          DataSet ds = new DataSet();
-          ds = blobj.GetDelete(vc, year, Period);
+          FileUpload fu = (FileUpload)row.FindControl("Final_Attachment");
 
-          if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0].RowState.ToString() == "Modified")
+          if (fu == null || !fu.HasFile)
+              continue;  
+
+        
+          DataSet ds = blobj.Get_Data_By_Lic(lic, vcode, period, year);
+          if (ds == null || ds.Tables[0].Rows.Count == 0)
+              continue;
+
+          List<string> fileList = new List<string>();
+
+          foreach (HttpPostedFile file in fu.PostedFiles)
           {
+              string fileName =
+                  ds.Tables[0].Rows[0]["ID"].ToString() + "_" +
+                  Path.GetFileName(file.FileName);
 
-              string oldRef = dsExist.Tables[0].Rows[0]["RefNo"].ToString();
-              for (int i = 0; i < PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows.Count; i++)
-              {
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["VCode"] = Session["Username"].ToString();
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["Year"] = Year.SelectedValue;
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["Period"] = SearchPeriod.SelectedValue;
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["RefNo"] = oldRef;
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i].AcceptChanges();
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i].SetAdded();
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["CreatedBy"] = Session["UserName"].ToString();
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["CreatedOn"] = System.DateTime.Now;
+              fileName = Regex.Replace(fileName,
+                  @"[,+*/?|><&=\#%:;@^$?:'()!~}{`]", "");
 
-              }
-
-
+              file.SaveAs(@"D:/Cybersoft_Doc/CLMS/Attachments/" + fileName);
+              fileList.Add(fileName);
           }
-      }
 
+          string attachments = string.Join(",", fileList);
 
-      else
-      {
-          DataSet ds = new DataSet();
-          DataSet ds1 = new DataSet();
-          ds = blobj.GetDelete(vc, year, Period);
-
-      
-         // string refNo = blobj.Generate_Global_RefNo("HALFYEARLY");
-
-          if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0].RowState == DataRowState.Modified)
+          foreach (DataRow dr in ds.Tables[0].Rows)
           {
-
-              for (int i = 0; i < PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows.Count; i++)
-              {
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["VCode"] = Session["Username"].ToString();
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["Year"] = Year.SelectedValue;
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["Period"] = SearchPeriod.SelectedValue;
-              //    PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["RefNo"] = refNo;
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i].AcceptChanges();
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i].SetAdded();
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["CreatedBy"] = Session["UserName"].ToString();
-                  PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[i]["CreatedOn"] = System.DateTime.Now;
-
-              }
-
-
+              dr["Final_Attachment"] = attachments;
+              dr["Status"] = "Pending With CC";
           }
+
+          blobj.SaveRecord(ref ds);
       }
 
+      MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Success,
+          "Record saved successfully !");
 
-
-
-
-
-
-      bool result = Save();
-
-      if (result)
-      {
-          string Ref_No = blobj.Get_Ref_No(PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["ID"].ToString());
-
-
-
-
-         System.Web.UI.ScriptManager.RegisterClientScriptBlock(this, this.GetType(), "AlertBox", "alert('Your Half Yearly Ref No. is: " + Ref_No + "');", true);
-
-         PageRecordDataSet.Clear();
-         HalfYearly_Records.BindData();
-         btnSave.Visible = false;
-         MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Success, "Record saved successfully !");
-
-
-
-      }
-      else
-      {
-          MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors, "Error While Saving !");
-      }
+      gvRefUpload.Visible = false;
+      btnSave.Visible = false;
   }
+
+
+
+
+
+
+string lic = row.Cells[0].Text.Trim();   some parameter comes like this &quot;NA&quot;15
+
+so that this licno does not match with my table column labourLicNo that is "NA"15
+
+SELECT * FROM App_Half_Yearly_Details WHERE labourLicNo = @lic AND vcode = @vcode AND period = @period AND year=@year 
+
+SELECT * FROM App_Half_Yearly_Details WHERE labourLicNo = '&quot;NA&quot;15' AND vcode = '10517' AND period = 'Jan-June' AND year='2024'
+
+
+please what is the solution for this so that it exact match in my query 
+
