@@ -1,30 +1,66 @@
-  private bool Check()
-  {
-      foreach (GridViewRow row in HalfYearly_Records.Rows)
-      {
-          string licNo = row.Cells[6].Text.Trim();
-          int capacity = Convert.ToInt32(row.Cells[7].Text);
-          int sexM = Convert.ToInt32(row.Cells[13].Text);
-          int sexF = Convert.ToInt32(row.Cells[14].Text);
+private bool Check()
+{
+    foreach (GridViewRow row in HalfYearly_Records.Rows)
+    {
+        string licNo = row.Cells[6].Text.Trim();
 
-          if (sexM + sexF > capacity)
-          {
-             
-              ScriptManager.RegisterStartupScript(
-                  this, this.GetType(),
-                  "alert",
-                  "alert(' Maxium No. of (Male+Female+children) cannot be greater than Capacity of License - {licNo}');",
-                  true);
+        int capacity        = Convert.ToInt32(row.Cells[7].Text);
+        int empMale         = Convert.ToInt32(row.Cells[13].Text);
+        int empFemale       = Convert.ToInt32(row.Cells[14].Text);
 
-           
-              btnSave.Enabled = false;
+        int mandaysMale     = Convert.ToInt32(row.Cells[15].Text);
+        int mandaysFemale   = Convert.ToInt32(row.Cells[16].Text);
 
-              return false;
-          }
-      }
+        int daysWorked      = Convert.ToInt32(row.Cells[17].Text); 
+        // if your "establishment of principal employer worked" is in another column,
+        // change the index accordingly.
 
-      
-      btnSave.Enabled = true;
+        int totalEmployees  = empMale + empFemale;
+        int totalMandays    = mandaysMale + mandaysFemale;
+        int maxAllowedDays  = totalEmployees * daysWorked;
 
-      return true;
-  }
+        // -------------------------
+        // ❌ VALIDATION 1:
+        // Employee count > Capacity
+        // -------------------------
+        if (totalEmployees > capacity)
+        {
+            string msg = $"❌ Employee count exceeded!\n\n" +
+                         $"License No: {licNo}\n" +
+                         $"Capacity Allowed: {capacity}\n" +
+                         $"Entered Employees (M+F): {totalEmployees}";
+
+            ScriptManager.RegisterStartupScript(
+                this, this.GetType(), "alert",
+                $"alert('{msg}');", true);
+
+            btnSave.Enabled = false;
+            return false;
+        }
+
+        // -------------------------
+        // ❌ VALIDATION 2:
+        // Mandays cannot exceed (Total Employees × Days Worked)
+        // -------------------------
+        if (totalMandays > maxAllowedDays)
+        {
+            string msg = $"❌ Mandays limit exceeded!\n\n" +
+                         $"License No: {licNo}\n" +
+                         $"Total Employees (M+F): {totalEmployees}\n" +
+                         $"Days Worked: {daysWorked}\n" +
+                         $"Maximum Allowed Mandays: {maxAllowedDays}\n" +
+                         $"Entered Mandays (M+F): {totalMandays}";
+
+            ScriptManager.RegisterStartupScript(
+                this, this.GetType(), "alert",
+                $"alert('{msg}');", true);
+
+            btnSave.Enabled = false;
+            return false;
+        }
+    }
+
+    // Everything OK
+    btnSave.Enabled = true;
+    return true;
+}
