@@ -1,38 +1,30 @@
-private bool Check()
-{
-    foreach (GridViewRow row in HalfYearly_Records.Rows)
-    {
-        int capacity = Convert.ToInt32(row.Cells[7].Text);
-        int sexM = Convert.ToInt32(row.Cells[13].Text);
-        int sexF = Convert.ToInt32(row.Cells[14].Text);
+  private bool Check()
+  {
+      foreach (GridViewRow row in HalfYearly_Records.Rows)
+      {
+          string licNo = row.Cells[6].Text.Trim();
+          int capacity = Convert.ToInt32(row.Cells[7].Text);
+          int sexM = Convert.ToInt32(row.Cells[13].Text);
+          int sexF = Convert.ToInt32(row.Cells[14].Text);
 
-        if (sexM + sexF > capacity)
-        {
-            // Show alert
-            ScriptManager.RegisterStartupScript(
-                this, this.GetType(),
-                "alert",
-                "alert('Total (M+F) cannot be greater than Capacity');",
-                true);
+          if (sexM + sexF > capacity)
+          {
+             
+              ScriptManager.RegisterStartupScript(
+                  this, this.GetType(),
+                  "alert",
+                  "alert(' Maxium No. of (Male+Female+children) cannot be greater than Capacity of License - {licNo}');",
+                  true);
 
-            // ❌ Disable Save Button
-            btnsave.Enabled = false;
+           
+              btnSave.Enabled = false;
 
-            return false;
-        }
-    }
+              return false;
+          }
+      }
 
-    // ✔ Enable Save Button if everything is OK
-    btnsave.Enabled = true;
+      
+      btnSave.Enabled = true;
 
-    return true;
-}
-
-protected void btnsave_Click(object sender, EventArgs e)
-{
-    if (!Check())
-        return;   // Stop saving
-
-    // Save code here...
-}
-
+      return true;
+  }
