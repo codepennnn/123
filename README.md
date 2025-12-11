@@ -1,29 +1,32 @@
-string debugScript = $"console.log('DEBUG: validation reached for {licNo}'); alert('{safe}');";
-ScriptManager.RegisterClientScriptBlock(this, this.GetType(), Guid.NewGuid().ToString(), debugScript, true);
+        if (totalMandays > maxAllowedMandays)
+        {
+            string msg = $"Total Mandays(Male+Female=Children) for License {licNo} exceeds allowed limit.\n\n" +
+                         $"Total Employees: {totalEmp}\n" +
+                         $"Days Worked: {item.Value.daysWorked}\n" +
+                         $"Max Allowed Mandays: {maxAllowedMandays}\n" +
+                         $"Entered Mandays: {totalMandays}";
+
+            ScriptManager.RegisterStartupScript(
+                this, this.GetType(),
+                "alert",
+                $"alert('{msg}');",
+                true);
+
+            //btnSave.Enabled = false;
+            return false;
+        }
 
 
-// build message safely
-string msg = $"Gross Wages for License {licNo} exceed limit.\\n" +
-             $"Total Mandays = {totalMandays}\\n" +
-             $"Allowed Amount = {allowedAmount}\\n" +
-             $"Entered Gross = {grossWages}";
+          if (totalEmp > capacity)
+  {
+      string msg = $"Total Workers (Male+Female=Children) for License {licNo} : {totalEmp} exceeds Capacity : {capacity}";
 
-// escape backslashes and single quotes, convert new lines to \n
-string safe = msg
-    .Replace("\\", "\\\\")
-    .Replace("'", "\\'")
-    .Replace("\r\n", "\\n")
-    .Replace("\n", "\\n");
+      ScriptManager.RegisterStartupScript(
+          this, this.GetType(),
+          "alert",
+          $"alert('{msg}');",
+          true);
 
-// unique key so ASP.NET won't ignore duplicates
-string script = $"alert('{safe}');";
-
-// If you use a ScriptManager on page (works with and without UpdatePanel)
-ScriptManager.RegisterClientScriptBlock(
-    this, 
-    this.GetType(), 
-    Guid.NewGuid().ToString(),   // unique key
-    script, 
-    true
-);
-
+      //btnSave.Enabled = false;
+      return false;
+  }
