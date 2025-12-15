@@ -1,37 +1,41 @@
-   private StringDictionary GetFilterCondition()
-   {
-       StringDictionary d = null;
-       d = new StringDictionary();
-       d.Add("VendorCode", Session["UserName"].ToString());
-       return d;
-   }
-  
-  public DataSet GetRecords(System.Collections.Specialized.StringDictionary FilterConditions, int totalPagesize, string sortExpression)
-  {
+private StringDictionary GetFilterCondition()
+{
+    StringDictionary d = new StringDictionary();
 
-      string strSQL = " select * from App_half_yearly_details where Status in ('Pending With CC','Return','Approved') ";
-      DataHelper dh = new DataHelper();
-      Dictionary<string, object> objParam = null;
-      if (FilterConditions != null && FilterConditions.Count > 0)
-      {
-          strSQL += " and ";
-          objParam = new Dictionary<string, object>();
-          int cnt = FilterConditions.Count;
-          foreach (string dickey in FilterConditions.Keys)
-          {
-              objParam.Add(dickey, "%" + FilterConditions[dickey] + '%');
-              if (cnt > 0 && cnt != FilterConditions.Count)
-                  strSQL += " and " + dickey + " like @" + dickey;
-              else
-                  strSQL += dickey + " like @" + dickey;
-              cnt--;
-          }
-      }
-      strSQL += " order by CreatedOn desc";
-      return dh.GetDataset(strSQL, "App_half_yearly_details", objParam);
+    if (Session["UserName"] != null)
+    {
+        d.Add("VendorCode", Session["UserName"].ToString());
+    }
 
-  }
- 
- 
- select * from App_half_yearly_details where Status in ('Pending With CC','Return','Approved')  and vendorcode like @vendorcode order by CreatedOn desc
- but i want   select * from App_half_yearly_details where Status in ('Pending With CC','Return','Approved')  and vcode = @vcode order by CreatedOn desc
+    return d;
+}
+
+public DataSet GetRecords(
+    System.Collections.Specialized.StringDictionary FilterConditions,
+    int totalPagesize,
+    string sortExpression)
+{
+    string strSQL =
+        "SELECT * FROM App_half_yearly_details " +
+        "WHERE Status IN ('Pending With CC','Return','Approved')";
+
+    DataHelper dh = new DataHelper();
+    Dictionary<string, object> objParam = new Dictionary<string, object>();
+
+    if (FilterConditions != null && FilterConditions.Count > 0)
+    {
+        foreach (string key in FilterConditions.Keys)
+        {
+            if (key == "VendorCode")
+            {
+                strSQL += " AND VCode = @VCode";
+                objParam.Add("@VCode", FilterConditions[key]);
+            }
+        }
+    }
+
+    strSQL += " ORDER BY CreatedOn DESC";
+
+    return dh.GetDataset(strSQL, "App_half_yearly_details", objParam);
+}
+
