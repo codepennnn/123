@@ -1,4 +1,8 @@
-string oldRef = dsExist.Tables[0].Rows[0]["RefNo"].ToString();
+DateTime oldCreatedOn =
+    Convert.ToDateTime(dsExist.Tables[0].Rows[0]["CreatedOn"]);
+
+string oldRef =
+    dsExist.Tables[0].Rows[0]["RefNo"].ToString();
 
 for (int i = 0; i < PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows.Count; i++)
 {
@@ -9,13 +13,14 @@ for (int i = 0; i < PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows.Cou
     row["Period"] = SearchPeriod.SelectedValue;
     row["RefNo"] = oldRef;
 
-    // 🔥 THIS IS WHAT YOU MISSED
-    row["ResubmitOn"] = DateTime.Now;
+    // ✅ Keep original CreatedOn
+    row["CreatedOn"] = oldCreatedOn;
+
+    // ✅ Set only resubmission date
+    row["ResubmittedOn"] = DateTime.Now;
 
     row["CreatedBy"] = Session["UserName"].ToString();
-    row["CreatedOn"] = DateTime.Now;
 
-    // IMPORTANT ORDER
     row.AcceptChanges();
     row.SetAdded();
 }
