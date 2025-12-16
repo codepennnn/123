@@ -1,46 +1,95 @@
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
+        <asp:Panel ID="pnlGrid" runat="server" Visible="false" Style="margin-top:18px">
+            <div class="grid-wrap">
+                <asp:GridView ID="gvAttendance" runat="server" CssClass="attendance" AutoGenerateColumns="false"
+                    OnRowDataBound="gvAttendance_RowDataBound" GridLines="None">
+                    <Columns>
+                       <%-- <asp:TemplateField HeaderText="Date">
+                            <ItemTemplate>
+                                <asp:Label ID="lblDate" runat="server" Text='<%# Eval("Date","{0:yyyy-MM-dd}") %>'></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>--%>
 
-        var ddl = document.getElementById("<%= ddlAadhar.ClientID %>");
-        var container = ddl.closest(".SearchDropDown");
-        var list = container.querySelector(".searchList");
-        var selectedText = container.querySelector(".selected-text");
+                        <asp:TemplateField HeaderText="Date">
+                            <ItemTemplate>
+                                <!-- what user sees -->
+                                <asp:Label ID="lblDateDisplay" runat="server"
+                                    Text='<%# Eval("Date", "{0:dd-MM-yyyy}") %>'></asp:Label>
 
-        list.innerHTML = ""; // clear
+                                <!-- hidden ISO value used by C# code -->
+                                <asp:HiddenField ID="hfDateIso" runat="server"
+                                    Value='<%# Eval("Date", "{0:yyyy-MM-dd}") %>' />
+                            </ItemTemplate>
+                        </asp:TemplateField>
 
-        // Build list from dropdown
-        for (var i = 0; i < ddl.options.length; i++) {
-            var opt = ddl.options[i];
-            if (opt.value === "") continue;
 
-            var div = document.createElement("div");
-            div.className = "dropdown-item";
-            div.style.cursor = "pointer";
-            div.innerText = opt.text;
-            div.dataset.value = opt.value;
-            div.dataset.text = opt.text;
 
-            div.onclick = function () {
-                ddl.value = this.dataset.value;
-                selectedText.innerText = this.dataset.text;
+                        <asp:TemplateField HeaderText="Aadhar">
+                            <ItemTemplate>
+                                <asp:Label ID="lblRowAadhar" runat="server" CssClass="grid-label row-aadhar-label"></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
 
-                container.querySelector(".floatDiv").style.display = "none";
+                        <asp:TemplateField HeaderText="Workman Name">
+                            <ItemTemplate>
+                                <asp:Label ID="lblRowName" runat="server" CssClass="grid-label row-name-label"></asp:Label>
+                            </ItemTemplate>
+                        </asp:TemplateField>
 
-                // Trigger postback
-                ddl.dispatchEvent(new Event('change'));
-            };
+                        <asp:TemplateField HeaderText="Work Order">
+                            <ItemTemplate>
+                                <asp:DropDownList ID="ddlRowWorkOrder" runat="server" CssClass="row-select row-wo" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
 
-            list.appendChild(div);
-        }
+                        <asp:TemplateField HeaderText="Location">
+                            <ItemTemplate>
+                                <asp:DropDownList ID="ddlRowLocation" runat="server" CssClass="row-select row-loc" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
 
-        // ✅ RESTORE selection after postback
-        if (ddl.value !== "") {
-            for (var j = 0; j < ddl.options.length; j++) {
-                if (ddl.options[j].value === ddl.value) {
-                    selectedText.innerText = ddl.options[j].text;
-                    break;
-                }
-            }
-        }
-    });
-</script>
+                        <asp:TemplateField HeaderText="OT(hrs)">
+                            <ItemTemplate>
+                                <asp:TextBox ID="txtOT" runat="server" CssClass="otbox row-ot" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+
+                        <asp:TemplateField HeaderText="Day Def">
+                            <ItemTemplate>
+                                <asp:DropDownList ID="ddlDayDef" runat="server" CssClass="small row-day">
+                                    <asp:ListItem Value="WD">Working Day</asp:ListItem>
+                                    <asp:ListItem Value="OD">Off Day</asp:ListItem>
+                                    <asp:ListItem Value="L">Leave</asp:ListItem>
+                                    <asp:ListItem Value="NH">Holiday</asp:ListItem>
+                                    <asp:ListItem Value="HF">Half Day</asp:ListItem>
+                                </asp:DropDownList>
+                            </ItemTemplate>
+                        </asp:TemplateField>
+
+                        <asp:TemplateField HeaderText="Engagement Type">
+    <ItemTemplate>
+        <asp:DropDownList ID="ddlEngagementType" runat="server" CssClass="row-select row-engtype">
+            <asp:ListItem Value="">-- Select --</asp:ListItem>
+            <asp:ListItem Value="ManPowerSupply">Manpower Supply</asp:ListItem>
+            <asp:ListItem Value="ItemRate">Item Rate</asp:ListItem>
+        </asp:DropDownList>
+    </ItemTemplate>
+</asp:TemplateField>
+
+
+                        <asp:TemplateField HeaderText="Present" ItemStyle-CssClass="center">
+                            <ItemTemplate>
+                                <asp:CheckBox ID="chkPresent" runat="server" CssClass="row-present" />
+                            </ItemTemplate>
+                        </asp:TemplateField>
+                    </Columns>
+                </asp:GridView>
+
+                <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+                    <div class="muted">Rows: <asp:Label ID="lblRowCount" runat="server" Text="0" /></div>
+                    <div style="display:flex; gap:8px;">
+                        <asp:Button ID="btnSave" runat="server" CssClass="btn btn-sm btn-success" Text="Save Attendance" OnClick="btnSave_Click" />
+                        <asp:Button ID="btnExport" runat="server" CssClass="btn btn-sm btn-warning" Text="Export CSV" OnClientClick="exportCsv(); return false;" />
+                    </div>
+                </div>
+            </div>
+        </asp:Panel>
