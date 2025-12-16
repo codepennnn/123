@@ -1,35 +1,23 @@
-thanks but also correct my saving and old remarks must be save with new remarks
+string newRemark =
+    "CC -- " +
+    DateTime.Now.ToString("dd/MM/yyyy") +
+    " -- " +
+    Remarks_CC.Trim();
 
-   string Remarks_CC = ((TextBox)Half_Yearly_Record.Rows[0].FindControl("Remarks")).Text;
+foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
+{
+    string oldRemarks = r["Remarks"] == DBNull.Value
+        ? string.Empty
+        : r["Remarks"].ToString();
 
+    // Append correctly
+    r["Remarks"] = oldRemarks + newRemark + " ||";
 
+    r["CC_UpdatedOn"] = DateTime.Now;
+    r["CC_UpdatedBy"] = Session["UserName"].ToString();
 
-   if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Status"].ToString() == "Approved")
-
-   {
-       foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
-
-       {
-           
-               r["CC_UpdatedOn"] = System.DateTime.Now;
-               r["CC_UpdatedBy"] = Session["UserName"].ToString();
-               r["Status"] = "Approved";
-               r["Remarks"] =  "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy") + " -- " + Remarks_CC + ") ||";
-           
-           
-       }
-   }
-   else
-   {
-
-       foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
-
-       {
-           r["CC_UpdatedOn"] = System.DateTime.Now;
-           r["CC_UpdatedBy"] = Session["UserName"].ToString();
-           r["Status"] = "Return";
-           r["Remarks"] =  "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy") + " -- " + Remarks_CC + ") ||";
-       }
-   }
-
-
+    if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Status"].ToString() == "Approved")
+        r["Status"] = "Approved";
+    else
+        r["Status"] = "Return";
+}
