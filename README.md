@@ -1,35 +1,42 @@
-    protected void ddlAadhar_SelectedIndexChanged(object sender, EventArgs e)
-    {
-        txtName.Text = "";
-        txtSlNo.Text = "";
-        txtCategory.Text = "";
-        txtVname.Text = "";
-        txtVcode.Text = "";
+WITH AttWO AS (
+    SELECT DISTINCT
+        att.WorkOrderNo AS wo_no,
+        w.LOC_OF_WORK   AS LOC_CODE,
+        w.Engagement_Type AS EngagementType
+    FROM App_AttendanceDetails att
+    LEFT JOIN app_workorder_reg w ON w.WO_NO = att.WorkOrderNo
+    WHERE att.Dates >= '3/1/2025 12:00:00' AND att.Dates < '4/1/2025 12:00:00'
+      AND att.VendorCode = '17201' and att.WorkOrderNo is not null
+),
+C3WO AS (
+    SELECT DISTINCT
+        dtl.WO_NO       AS wo_no,
+        w2.LOC_OF_WORK  AS LOC_CODE,
+        w2.Engagement_Type AS EngagementType
+    FROM App_Vendor_form_C3_Dtl dtl
+    LEFT JOIN app_workorder_reg w2 ON w2.WO_NO = dtl.WO_NO
+    WHERE dtl.C3_CLOSER_DATE >= '3/1/2025 12:00:00' and dtl.WO_NO is not null
+      AND dtl.V_CODE = '17201'
+      AND NOT EXISTS (
+            SELECT 1
+            FROM App_Wo_Nil n
+            WHERE n.WO_NO = dtl.WO_NO
+              AND n.TEMPORARY_MONTH = '03'
+              AND n.TEMPORARY_YEAR  = '2025'
+              AND n.NO_WORK = 'Temporary'
+      )
+      AND NOT EXISTS (
+            SELECT 1
+            FROM App_Wo_Nil n2
+            WHERE n2.WO_NO = dtl.WO_NO
+              AND n2.NO_WORK = 'Permanent'
+              AND (CAST(n2.TEMPORARY_YEAR AS INT) * 100
+                   + CASE WHEN TRY_CAST(n2.CLOSER_DATE AS INT) IS NULL
+                          THEN 0 ELSE TRY_CAST(n2.CLOSER_DATE AS INT) END) <= '202503'
+      )
+)
+SELECT wo_no, LOC_CODE, EngagementType FROM AttWO
+UNION
+SELECT wo_no, LOC_CODE, EngagementType FROM C3WO;
 
-        if (string.IsNullOrEmpty(ddlAadhar.SelectedValue))
-            return;
-
-        string aadhar = ddlAadhar.SelectedValue;
-
-        using (var cn = new SqlConnection(_connString))
-        using (var cmd = new SqlCommand(
-            @"SELECT Name, WorkManSlNo, WorkManCategory,VendorName,VendorCode 
-      FROM App_EmployeeMaster 
-      WHERE AadharCard = @Aadhar", cn))
-        {
-            cmd.Parameters.AddWithValue("@Aadhar", aadhar);
-            cn.Open();
-            using (var dr = cmd.ExecuteReader())
-            {
-                if (dr.Read())
-                {
-                    txtName.Text = dr["Name"].ToString();
-                    txtSlNo.Text = dr["WorkManSlNo"].ToString();
-                    txtCategory.Text = dr["WorkManCategory"].ToString();
-                    txtVname.Text = dr["VendorName"].ToString();
-                    txtVcode.Text = dr["VendorCode"].ToString();
-                }
-            }
-        }
-    }
-i logged vendorcode in Session["UserName"].ToString() so i want to pass this so that correct vendor fetch because one aadhar has muliple vendor 
+some engagment_type is coming null because of no data so i want if null then default show - Manpower Supply
