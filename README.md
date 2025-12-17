@@ -1,88 +1,89 @@
+        protected void btnView_Click(object sender, EventArgs e)
+        {
+            LoadLookups_emp_wo();
 
+            litMessage.Text = "";
+            int month = int.Parse(ddlMonth.SelectedValue);
+            int year = int.Parse(ddlYear.SelectedValue);
 
-    <script>
+            DateTime first = new DateTime(year, month, 1);
+            int days = DateTime.DaysInMonth(year, month);
+            DateTime last = new DateTime(year, month, days);
 
+            // Reload existing attendance if aadhar selected
+            string selectedAadhar = ddlAadhar.SelectedValue;
+            if (!string.IsNullOrEmpty(selectedAadhar))
+            {
+                var existing = LoadExistingAttendance(first, last, selectedAadhar);
+                ViewState["ExistingAttendance"] = existing;
+                if (existing.Rows.Count > 0)
+                    litMessage.Text = $"<div class='message'>Loaded existing attendance for {selectedAadhar} ({existing.Rows.Count} rows).</div>";
+                else
+                    litMessage.Text = "<div class='message'>No existing attendance found for selected Aadhar; showing blank month.</div>";
+            }
+            else
+            {
+                ViewState["ExistingAttendance"] = null;
+            }
 
+            // --- Determine DOJ for selected Aadhar (nullable)
+            DateTime? doj = null;
 
+            if (!string.IsNullOrEmpty(selectedAadhar))
+            {
+                var dtEmployees = ViewState["Employees"] as DataTable;
+                if (dtEmployees != null && dtEmployees.Columns.Contains("DOJ"))
+                {
+                    // safe select from the cached lookup table
+                    DataRow[] rows = dtEmployees.Select($"AadharCard = '{selectedAadhar.Replace("'", "''")}'");
+                    if (rows.Length > 0 && rows[0]["DOJ"] != DBNull.Value)
+                    {
+                        doj = Convert.ToDateTime(rows[0]["DOJ"]).Date;
+                    }
+                }
 
-        document.addEventListener("DOMContentLoaded", function () {
-
-            var ddl = document.getElementById("<%= ddlAadhar.ClientID %>");
-        var container = ddl.closest(".SearchDropDown");
-        var list = container.querySelector(".searchList");
-        var selectedText = container.querySelector(".selected-text");
-
-        list.innerHTML = ""; // clear
-
-        // Build list from dropdown
-        for (var i = 0; i < ddl.options.length; i++) {
-            var opt = ddl.options[i];
-            if (opt.value === "") continue;
-
-            var div = document.createElement("div");
-            div.className = "dropdown-item";
-            div.style.cursor = "pointer";
-            div.innerText = opt.text;
-            div.dataset.value = opt.value;
-            div.dataset.text = opt.text;
-
-            div.onclick = function () {
-                ddl.value = this.dataset.value;
-                selectedText.innerText = this.dataset.text;
-
-                container.querySelector(".floatDiv").style.display = "none";
-
-                // Trigger postback
-                ddl.dispatchEvent(new Event('change'));
-            };
-
-            list.appendChild(div);
-        }
-
-       
-        if (ddl.value !== "") {
-            for (var j = 0; j < ddl.options.length; j++) {
-                if (ddl.options[j].value === ddl.value) {
-                    selectedText.innerText = ddl.options[j].text;
-                    break;
+                // fallback: if DOJ not found in ViewState, query DB for this single aadhar
+                if (!doj.HasValue)
+                {
+                    using (var cn = new SqlConnection(_connString))
+                    using (var cmd = new SqlCommand("SELECT DOJ FROM App_EmployeeMaster WHERE AadharCard = @Aadhar", cn))
+                    {
+                        cmd.Parameters.AddWithValue("@Aadhar", selectedAadhar);
+                        cn.Open();
+                        var obj = cmd.ExecuteScalar();
+                        if (obj != null && obj != DBNull.Value)
+                        {
+                            doj = Convert.ToDateTime(obj).Date;
+                        }
+                    }
                 }
             }
-        }
-    });
 
+            // Build and bind date rows, skipping dates before DOJ (if DOJ known)
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Date", typeof(DateTime));
+            for (int d = 0; d < days; d++)
+            {
+                DateTime currentDate = first.AddDays(d);
 
+                // Skip dates BEFORE DOJ (if doj known)
+                if (doj.HasValue && currentDate < doj.Value)
+                    continue;
 
-        function toggleAadharDD(btn) {
-            var panel = btn.nextElementSibling;
-            panel.style.display = panel.style.display === "block" ? "none" : "block";
-        }
-
-        function filterAadhar(input) {
-            var filter = input.value.toUpperCase();
-            var items = input.parentElement.querySelectorAll(".dropdown-item");
-
-            items.forEach(function (item) {
-                item.style.display = item.innerText.toUpperCase().indexOf(filter) > -1 ? "" : "none";
-            });
-        }
-
-        // close when clicking outside
-        document.addEventListener("click", function (e) {
-            document.querySelectorAll(".SearchDropDown").forEach(function (dd) {
-                if (!dd.contains(e.target)) {
-                    dd.querySelector(".floatDiv").style.display = "none";
-                }
-            });
-        });
-
-                        document.querySelector(".floatDiv").style.display = "none";
-                };
-
-                list.appendChild(div);
+                var r = dt.NewRow();
+                r["Date"] = currentDate;
+                dt.Rows.Add(r);
             }
+
+            gvAttendance.DataSource = dt;
+            gvAttendance.DataBind();
+            pnlGrid.Visible = true;
         }
-                }
-  });
 
 
-    </script>
+
+Dates should appear based on DOJ and DOE after Aadhaar selection:
+Before DOJ, dates should not appear.
+After DOE, dates should not appear.
+
+here is my table select DOJ,DOE,apprvstatus from App_EmployeeMaster where aadharcard='917543928910' and vendorcode='17201' 
