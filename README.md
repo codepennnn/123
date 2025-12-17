@@ -1,42 +1,17 @@
-[System.Web.Services.WebMethod]
-public static List<string> GetPresentAadhars(int month, int year)
-{
-    try
-    {
-        var list = new List<string>();
+select option.att-done {
+    background-color: #dcfce7;
+    color: #166534;
+    font-weight: 600;
+}
 
-        string connStr = ConfigurationManager
-            .ConnectionStrings["Connect"].ConnectionString;
 
-        DateTime fromDate = new DateTime(year, month, 1);
-        DateTime toDate = fromDate.AddMonths(1);
-
-        using (var cn = new SqlConnection(connStr))
-        using (var cmd = new SqlCommand(@"
-            SELECT DISTINCT AadharNo
-            FROM App_AttendanceDetails
-            WHERE Dates >= @FromDate
-              AND Dates <  @ToDate
-              AND Present = 1", cn))
-        {
-            cmd.Parameters.Add("@FromDate", SqlDbType.Date).Value = fromDate;
-            cmd.Parameters.Add("@ToDate", SqlDbType.Date).Value = toDate;
-
-            cn.Open();
-            using (var dr = cmd.ExecuteReader())
-            {
-                while (dr.Read())
-                {
-                    list.Add(dr[0].ToString()); // safer than GetString
-                }
-            }
+document.getElementById("<%= ddlAadhar.ClientID %>")
+    .addEventListener("change", function () {
+        if (this.selectedIndex > 0) {
+            this.options[this.selectedIndex].classList.add("att-done");
         }
+    });
 
-        return list;
-    }
-    catch (Exception ex)
-    {
-        // THIS will surface the real issue
-        throw new Exception("GetPresentAadhars failed: " + ex.Message);
-    }
+if (!ddl.options[ddl.selectedIndex].classList.contains("att-done")) {
+    ddl.options[ddl.selectedIndex].classList.add("att-done");
 }
