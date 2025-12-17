@@ -1,232 +1,150 @@
 protected void gvAttendance_RowDataBound(object sender, GridViewRowEventArgs e)
 {
-    if (e.Row.RowType != DataControlRowType.DataRow) return;
+    if (e.Row.RowType != DataControlRowType.DataRow)
+        return;
 
     var dtWorkOrders = ViewState["WorkOrders"] as DataTable;
-    var dtLocations = ViewState["Locations"] as DataTable;
-    var dtEmployees = ViewState["Employees"] as DataTable;
-    var dtExisting = ViewState["ExistingAttendance"] as DataTable;
+    var dtLocations  = ViewState["Locations"] as DataTable;
+    var dtEmployees  = ViewState["Employees"] as DataTable;
+    var dtExisting   = ViewState["ExistingAttendance"] as DataTable;
 
-    //var lblDate = e.Row.FindControl("lblDate") as Label;
-    var hfDate = e.Row.FindControl("hfDateIso") as HiddenField;
-
-    var lblAadhar = e.Row.FindControl("lblRowAadhar") as Label;
-    var lblName = e.Row.FindControl("lblRowName") as Label;
-    var ddlRowWorkOrder = e.Row.FindControl("ddlRowWorkOrder") as DropDownList;
-    var ddlRowLocation = e.Row.FindControl("ddlRowLocation") as DropDownList;
-    var txtOT = e.Row.FindControl("txtOT") as TextBox;
-    var ddlDayDef = e.Row.FindControl("ddlDayDef") as DropDownList;
-    var chkPresent = e.Row.FindControl("chkPresent") as CheckBox;
-    var ddlEngType = e.Row.FindControl("ddlEngagementType") as DropDownList;
+    var hfDate       = e.Row.FindControl("hfDateIso") as HiddenField;
+    var lblAadhar    = e.Row.FindControl("lblRowAadhar") as Label;
+    var lblName      = e.Row.FindControl("lblRowName") as Label;
+    var ddlWO        = e.Row.FindControl("ddlRowWorkOrder") as DropDownList;
+    var ddlLoc       = e.Row.FindControl("ddlRowLocation") as DropDownList;
+    var ddlDayDef    = e.Row.FindControl("ddlDayDef") as DropDownList;
+    var ddlEng       = e.Row.FindControl("ddlEngagementType") as DropDownList;
+    var txtOT        = e.Row.FindControl("txtOT") as TextBox;
+    var chkPresent   = e.Row.FindControl("chkPresent") as CheckBox;
 
     // ----------------------------
-    // Determine row date
+    // Row Date
     // ----------------------------
-
-
-    //DateTime rowDate = DateTime.MinValue;
-    //if (lblDate != null && DateTime.TryParse(lblDate.Text, out DateTime tmp))
-    //    rowDate = tmp.Date;
-
     DateTime rowDate = DateTime.MinValue;
-    if (hfDate != null &&
+    if (hfDate != null)
         DateTime.TryParseExact(hfDate.Value, "yyyy-MM-dd",
-            CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime tmp))
-    {
-        rowDate = tmp.Date;
-    }
-
-
-
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out rowDate);
 
     // ----------------------------
-    // Bind Work Orders
+    // Bind WorkOrders
     // ----------------------------
-    
-
-    //3rd
-    if (ddlRowWorkOrder != null)
+    if (ddlWO != null)
     {
-        ddlRowWorkOrder.Items.Clear();
-        ddlRowWorkOrder.Items.Add(new ListItem("-- Select --", ""));
+        ddlWO.Items.Clear();
+        ddlWO.Items.Add(new ListItem("-- Select --", ""));
 
         if (dtWorkOrders != null)
         {
             foreach (DataRow r in dtWorkOrders.Rows)
             {
-                string wo = Convert.ToString(r["wo_no"]);
-                //string loc = r.Table.Columns.Contains("Location_Code") && r["Location_Code"] != DBNull.Value
-                //                ? Convert.ToString(r["Location_Code"])
-                //                : "";
+                var li = new ListItem(
+                    Convert.ToString(r["wo_no"]),
+                    Convert.ToString(r["wo_no"])
+                );
 
-                string loc = r.Table.Columns.Contains("Loc_Code") && r["Loc_Code"] != DBNull.Value
-                                ? Convert.ToString(r["Loc_Code"])
-                                : "";
-                string eng = r.Table.Columns.Contains("EngagementType") && r["EngagementType"] != DBNull.Value
-                                ? Convert.ToString(r["EngagementType"])
-                                : "";
+                li.Attributes["data-loc"] = Convert.ToString(r["LOC_CODE"]);
+                li.Attributes["data-eng"] = NormalizeEngagement(
+                                                Convert.ToString(r["EngagementType"])
+                                            );
 
-                var li = new ListItem(wo, wo);
-
-                if (!string.IsNullOrEmpty(loc))
-                    li.Attributes["data-loc"] = loc;        // already used for Location
-
-                if (!string.IsNullOrEmpty(eng))
-                    li.Attributes["data-eng"] = NormalizeEngagement(eng);        // NOTE: normalized
-
-                ddlRowWorkOrder.Items.Add(li);
+                ddlWO.Items.Add(li);
             }
         }
     }
-
-
 
     // ----------------------------
     // Bind Locations
     // ----------------------------
-    if (ddlRowLocation != null)
+    if (ddlLoc != null)
     {
-        ddlRowLocation.Items.Clear();
-        ddlRowLocation.Items.Add(new ListItem("-- Select --", ""));
-        if (dtLocations != null)
-        {
-            foreach (DataRow r in dtLocations.Rows)
-            {
-                ddlRowLocation.Items.Add(new ListItem(
-                    Convert.ToString(r["Location"]),
-                    Convert.ToString(r["LocationCode"])
-                ));
-            }
-        }
+        ddlLoc.Items.Clear();
+        ddlLoc.Items.Add(new ListItem("-- Select --", ""));
+
+        foreach (DataRow r in dtLocations.Rows)
+            ddlLoc.Items.Add(new ListItem(
+                Convert.ToString(r["Location"]),
+                Convert.ToString(r["LocationCode"])
+            ));
     }
 
     // ----------------------------
-    // Default DayDef: Sunday = OD (disabled), Weekday = WD (enabled)
+    // Default DayDef
     // ----------------------------
     if (ddlDayDef != null && rowDate != DateTime.MinValue)
     {
-        if (rowDate.DayOfWeek == DayOfWeek.Sunday)
-        {
-            if (ddlDayDef.Items.FindByValue("OD") != null)
-                ddlDayDef.SelectedValue = "OD";
-
-            ddlDayDef.Enabled = false;
-        }
-        else
-        {
-            if (ddlDayDef.Items.FindByValue("WD") != null)
-                ddlDayDef.SelectedValue = "WD";
-
-            ddlDayDef.Enabled = true;
-        }
+        ddlDayDef.SelectedValue =
+            rowDate.DayOfWeek == DayOfWeek.Sunday ? "OD" : "WD";
+        ddlDayDef.Enabled = rowDate.DayOfWeek != DayOfWeek.Sunday;
     }
 
     // ----------------------------
-    // Load existing attendance if available
+    // Existing Attendance
     // ----------------------------
+    DataRow matched = null;
     if (dtExisting != null && rowDate != DateTime.MinValue)
     {
-        DataRow matched = null;
-        string topAadhar = ddlAadhar.SelectedValue;
+        matched = dtExisting.AsEnumerable()
+            .FirstOrDefault(r => Convert.ToDateTime(r["Dates"]).Date == rowDate);
+    }
 
-        foreach (DataRow r in dtExisting.Rows)
-        {
-            if (r["Dates"] == DBNull.Value) continue;
+    if (matched != null)
+    {
+        lblAadhar.Text = Convert.ToString(matched["AadharNo"]);
+        lblName.Text   = Convert.ToString(matched["WorkManName"]);
 
+        // WorkOrder
+        string wo = Convert.ToString(matched["WorkOrderNo"]);
+        if (ddlWO.Items.FindByValue(wo) != null)
+            ddlWO.SelectedValue = wo;
 
-            DateTime dbDate = Convert.ToDateTime(r["Dates"]).Date; 
-            string dbAadhar = Convert.ToString(r["AadharNo"]).Trim();
+        // Location
+        string loc = Convert.ToString(matched["LocationCode"]);
+        if (ddlLoc.Items.FindByValue(loc) != null)
+            ddlLoc.SelectedValue = loc;
 
-            if (dbDate == rowDate &&
-                (string.IsNullOrEmpty(topAadhar) ||
-                 dbAadhar.Equals(topAadhar.Trim(), StringComparison.OrdinalIgnoreCase)))
-            {
-                matched = r;
-                break;
-            }
-        }
+        // Engagement
+        string eng = matched["EngagementType"] == DBNull.Value
+                     ? "ManPowerSupply"
+                     : NormalizeEngagement(Convert.ToString(matched["EngagementType"]));
+        ddlEng.SelectedValue = eng;
 
-        if (matched != null)
-        {
-            lblAadhar.Text = Convert.ToString(matched["AadharNo"]);
-            lblName.Text = Convert.ToString(matched["WorkManName"]);
-
-            // Work Order
-            if (ddlRowWorkOrder != null && matched["WorkOrderNo"] != DBNull.Value)
-            {
-                string wo = Convert.ToString(matched["WorkOrderNo"]).Trim();
-                if (ddlRowWorkOrder.Items.FindByValue(wo) != null)
-                    ddlRowWorkOrder.SelectedValue = wo;
-            }
-
-            // Location
-            if (ddlRowLocation != null && matched["LocationCode"] != DBNull.Value)
-            {
-                string loc = Convert.ToString(matched["LocationCode"]).Trim();
-                if (ddlRowLocation.Items.FindByValue(loc) != null)
-                    ddlRowLocation.SelectedValue = loc;
-            }
-
-            // OT
-            if (txtOT != null && matched["OT_Hrs"] != DBNull.Value)
-                txtOT.Text = Convert.ToString(matched["OT_Hrs"]);
-
-            // DayDef
-            if (ddlDayDef != null && matched["DayDef"] != DBNull.Value)
-            {
-                string dbDay = Convert.ToString(matched["DayDef"]).Trim().ToUpper();
-                if (ddlDayDef.Items.FindByValue(dbDay) != null)
-                    ddlDayDef.SelectedValue = dbDay;
-            }
-
-            // Present
-            if (chkPresent != null && matched["Present"] != DBNull.Value)
-                chkPresent.Checked = Convert.ToBoolean(matched["Present"]);
-
-            // Engagement Type (NEW)                   
-
-            if (ddlEngType != null && matched.Table.Columns.Contains("EngagementType"))
-            {
-                string dbE = Convert.ToString(matched["EngagementType"]).Trim();
-                string normalized = NormalizeEngagement(dbE);
-                if (!string.IsNullOrEmpty(normalized) && ddlEngType.Items.FindByValue(normalized) != null)
-                    ddlEngType.SelectedValue = normalized;
-            }
-
-
-
-
-
-        }
-        else
-        {
-            // Prefill from top dropdown
-            if (!string.IsNullOrEmpty(ddlAadhar.SelectedValue))
-            {
-                lblAadhar.Text = ddlAadhar.SelectedValue;
-
-                var em = dtEmployees?.Select($"AadharCard = '{ddlAadhar.SelectedValue}'");
-                if (em != null && em.Length > 0)
-                    lblName.Text = Convert.ToString(em[0]["Name"]);
-            }
-
-            if (chkPresent != null) chkPresent.Checked = false;
-        }
+        // OT / Present
+        txtOT.Text = Convert.ToString(matched["OT_Hrs"]);
+        chkPresent.Checked = Convert.ToBoolean(matched["Present"]);
     }
     else
     {
-        // Fresh month with no saved data
-        if (!string.IsNullOrEmpty(ddlAadhar.SelectedValue))
-        {
-            lblAadhar.Text = ddlAadhar.SelectedValue;
+        // ----------------------------
+        // NEW ROW → AUTO DEFAULTS
+        // ----------------------------
+        lblAadhar.Text = ddlAadhar.SelectedValue;
 
-            var em = dtEmployees?.Select($"AadharNo = '{ddlAadhar.SelectedValue}'");
-            if (em != null && em.Length > 0)
-                lblName.Text = Convert.ToString(em[0]["Name"]);
-        }
+        var emp = dtEmployees?.Select($"AadharCard = '{ddlAadhar.SelectedValue}'");
+        if (emp != null && emp.Length > 0)
+            lblName.Text = Convert.ToString(emp[0]["Name"]);
 
-        if (chkPresent != null) chkPresent.Checked = false;
+        chkPresent.Checked = false;
     }
 
-    // Client-side JS will apply present/absent row colors
+    // ----------------------------
+    // FORCE DEFAULT WORKORDER
+    // ----------------------------
+    if (ddlWO != null && string.IsNullOrEmpty(ddlWO.SelectedValue)
+        && ddlWO.Items.Count > 1)
+    {
+        ddlWO.SelectedIndex = 1; // first valid WO
+
+        var li = ddlWO.SelectedItem;
+        if (ddlLoc.Items.FindByValue(li.Attributes["data-loc"]) != null)
+            ddlLoc.SelectedValue = li.Attributes["data-loc"];
+
+        ddlEng.SelectedValue = li.Attributes["data-eng"];
+    }
+
+    // ----------------------------
+    // FORCE DEFAULT ENGAGEMENT
+    // ----------------------------
+    if (ddlEng != null && string.IsNullOrEmpty(ddlEng.SelectedValue))
+        ddlEng.SelectedValue = "ManPowerSupply";
 }
