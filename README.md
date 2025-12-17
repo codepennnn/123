@@ -5,9 +5,10 @@
     font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
+/* Base card */
 .dashboard-card {
     flex: 1;
-    background: #fff;
+    background: #ffffff;
     border-radius: 6px;
     padding: 10px 12px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.08);
@@ -16,30 +17,38 @@
     overflow: hidden;
 }
 
-/* Wider color strip at the top */
+/* Top color strip */
 .dashboard-card::before {
     content: "";
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 12px; /* Increased height for strip */
-    background-color: #60a5fa; /* Default blue */
+    height: 12px;
+    background-color: #60a5fa; /* default blue */
 }
 
-.dashboard-card.present::before { background-color: #34d399; } /* Green */
-.dashboard-card.absent::before  { background-color: #f87171; } /* Red */
+/* ===== STATUS COLORS ===== */
+.dashboard-card.total::before    { background-color: #60a5fa; } /* Blue */
+.dashboard-card.present::before  { background-color: #22c55e; } /* Green */
+.dashboard-card.absent::before   { background-color: #ef4444; } /* Red */
+.dashboard-card.od::before       { background-color: #f59e0b; } /* Orange */
+.dashboard-card.leave::before    { background-color: #8b5cf6; } /* Purple */
+.dashboard-card.holiday::before  { background-color: #0ea5e9; } /* Sky Blue */
+.dashboard-card.halfday::before  { background-color: #ec4899; } /* Pink */
 
+/* Title */
 .dashboard-title {
     font-size: 14px;
-    font-weight: bold;
+    font-weight: 600;
     color: #374151;
-    margin-top: 16px; /* Push down to clear strip */
+    margin-top: 16px;
 }
 
+/* Value */
 .dashboard-value {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 22px;
+    font-weight: 700;
     color: #111827;
-    margin-top: 4px;
+    margin-top: 6px;
 }
