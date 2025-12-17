@@ -1,20 +1,33 @@
-    if (dtWorkOrders != null && string.IsNullOrEmpty(dtWorkOrders.SelectedValue)
-        && dtWorkOrders.Items.Count > 1)
+// ----------------------------
+// FORCE DEFAULT WORK ORDER
+// ----------------------------
+if (ddlRowWorkOrder != null
+    && string.IsNullOrEmpty(ddlRowWorkOrder.SelectedValue)
+    && ddlRowWorkOrder.Items.Count > 1)
+{
+    // Select first valid WorkOrder (index 1, after "-- Select --")
+    ddlRowWorkOrder.SelectedIndex = 1;
+
+    var li = ddlRowWorkOrder.SelectedItem;
+
+    // Auto-fill Location from WO
+    if (ddlRowLocation != null &&
+        li.Attributes["data-loc"] != null &&
+        ddlRowLocation.Items.FindByValue(li.Attributes["data-loc"]) != null)
     {
-        dtWorkOrders.SelectedIndex = 1; 
-
-        var li = dtWorkOrders.SelectedItem;
-        if (ddlRowLocation.Items.FindByValue(li.Attributes["data-loc"]) != null)
-            ddlRowLocation.SelectedValue = li.Attributes["data-loc"];
-
-        ddlEngType.SelectedValue = li.Attributes["data-eng"];
+        ddlRowLocation.SelectedValue = li.Attributes["data-loc"];
     }
 
-    
-    if (ddlEngType != null && string.IsNullOrEmpty(ddlEngType.SelectedValue))
-        ddlEngType.SelectedValue = "ManPowerSupply";
+    // Auto-fill EngagementType from WO
+    if (ddlEngType != null && li.Attributes["data-eng"] != null)
+    {
+        ddlEngType.SelectedValue = li.Attributes["data-eng"];
+    }
+}
 
-        error SelectedValue Items SelectedIndex
 
-        Compiler Error CS1061
-'type' does not contain a definition for 'name' and no accessible extension method 'name' accepting a first argument of type 'type' could be found (are you missing a using directive or an assembly reference?).
+if (ddlEngType != null && string.IsNullOrEmpty(ddlEngType.SelectedValue))
+{
+    ddlEngType.SelectedValue = "ManPowerSupply";
+}
+
