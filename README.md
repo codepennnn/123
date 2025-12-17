@@ -32,3 +32,4 @@
             }
         }
     }
+i logged vendorcode in Session["UserName"].ToString() so i want to pass this so that correct vendor fetch because one aadhar has muliple vendor 
