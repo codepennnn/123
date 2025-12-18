@@ -1,105 +1,62 @@
-       function updateDashboard() {
-           var rows = document.querySelectorAll("#<%= gvAttendance.ClientID %> tr");
+function updateDashboard() {
 
-    var total = 0,
-        present = 0,
-        absent = 0,
-        od = 0,
-        leave = 0,
-        holiday = 0,
-        halfday = 0;
+    var rows = document.querySelectorAll(
+        "#<%= gvAttendance.ClientID %> tr");
+
+    var total = 0;
+    var present = 0;
+    var absent = 0;
+    var offDay = 0;
+    var leave = 0;
+    var holiday = 0;
+    var halfDay = 0;
 
     rows.forEach(function (row) {
 
-        var chk = row.querySelector("input[type='checkbox'][id*='chkPresent']");
-        var ddlDay = row.querySelector("select[id*='ddlDayDef']");
+        var chk = row.querySelector(
+            "input[type='checkbox'][id*='chkPresent']");
+        var dayDef = row.querySelector(
+            "select[id*='ddlDayDef']");
 
-        if (!chk || !ddlDay) return;
+        if (!chk || !dayDef) return;
 
         total++;
 
-        var dayVal = ddlDay.value;
+        var def = dayDef.value;
 
-        switch (dayVal) {
-            case "WD":
-                if (chk.checked) present++;
-                else absent++;
-                break;
-
-            case "OD":
-                od++;
-                break;
-
-            case "LV":
-                leave++;
-                break;
-
-            case "NH":
-                holiday++;
-                break;
-
-            case "HF":
-                halfday++;
-                break;
+        // ✅ COUNT ONLY WHEN CHECKED
+        if (chk.checked) {
+            switch (def) {
+                case "WD":
+                    present++;
+                    break;
+                case "OD":
+                    offDay++;
+                    break;
+                case "L":
+                    leave++;
+                    break;
+                case "NH":
+                    holiday++;
+                    break;
+                case "HF":
+                    halfDay++;
+                    break;
+            }
+        }
+        // ❌ UNCHECKED → only WD becomes Absent
+        else {
+            if (def === "WD") {
+                absent++;
+            }
         }
     });
 
     document.getElementById("dashTotal").textContent = total;
     document.getElementById("dashPresent").textContent = present;
     document.getElementById("dashAbsent").textContent = absent;
-    document.getElementById("dashOD").textContent = od;
+    document.getElementById("dashOffDay").textContent = offDay;
     document.getElementById("dashLeave").textContent = leave;
     document.getElementById("dashHoliday").textContent = holiday;
-    document.getElementById("dashHalfDay").textContent = halfday;
+    document.getElementById("dashHalfDay").textContent = halfDay;
 }
-
-       document.addEventListener("DOMContentLoaded", updateDashboard);
-
-       document.addEventListener("change", function (e) {
-           if (
-               e.target.matches("input[type='checkbox'][id*='chkPresent']") ||
-               e.target.matches("select[id*='ddlDayDef']")
-           ) {
-               updateDashboard();
-           }
-       });
-
-
-
-
-        <div id="dashboard" class="dashboard-container">
-     <div class="dashboard-card">
-         <div class="dashboard-title"><strong>Total Days</strong></div>
-         <div class="dashboard-value" id="dashTotal">0</div>
-     </div>
-
-     <div class="dashboard-card present">
-         <div class="dashboard-title"><strong>Present</strong></div>
-         <div class="dashboard-value" id="dashPresent">0</div>
-     </div>
-
-     <div class="dashboard-card absent">
-         <div class="dashboard-title"><strong>Absent</strong></div>
-         <div class="dashboard-value" id="dashAbsent">0</div>
-     </div>
-
-     <div class="dashboard-card od">
-         <div class="dashboard-title"><strong>Off Day</strong></div>
-         <div class="dashboard-value" id="dashOD">0</div>
-     </div>
-
-     <div class="dashboard-card leave">
-         <div class="dashboard-title"><strong>Leave</strong></div>
-         <div class="dashboard-value" id="dashLeave">0</div>
-     </div>
-
-     <div class="dashboard-card holiday">
-         <div class="dashboard-title"><strong>Holiday</strong></div>
-         <div class="dashboard-value" id="dashHoliday">0</div>
-     </div>
-
-     <div class="dashboard-card halfday">
-         <div class="dashboard-title"><strong>Half Day</strong></div>
-         <div class="dashboard-value" id="dashHalfDay">0</div>
-     </div>
- </div>
