@@ -1,32 +1,16 @@
-<asp:TextBox 
-    ID="Contractors_Establishment_Worked"
-    runat="server"
-    CssClass="form-control form-control-sm font-small"
-    MaxLength="154">
-</asp:TextBox>
+<script type="text/javascript">
+    function validateIntInput(txt, max) {
 
-<asp:RequiredFieldValidator 
-    ID="rfvCEW"
-    runat="server"
-    ControlToValidate="Contractors_Establishment_Worked"
-    ErrorMessage="This field is required."
-    ValidationGroup="save"
-    Display="Dynamic"
-    ForeColor="Red" />
+        // Remove non-numeric characters
+        txt.value = txt.value.replace(/[^0-9]/g, '');
 
-<asp:CustomValidator 
-    ID="cvCEWMax"
-    runat="server"
-    ControlToValidate="Contractors_Establishment_Worked"
-    ErrorMessage="Maximum 154 characters allowed."
-    ValidationGroup="save"
-    Display="Dynamic"
-    ForeColor="Red"
-    OnServerValidate="cvCEWMax_ServerValidate" />
+        if (txt.value === '') return;
 
-protected void cvCEWMax_ServerValidate(object source, ServerValidateEventArgs args)
-{
-    args.IsValid = args.Value.Length <= 154;
-}
+        var val = parseInt(txt.value, 10);
 
-    
+        if (val > max) {
+            alert("Maximum value allowed is " + max);
+            txt.value = max;   // force max value
+        }
+    }
+</script>
