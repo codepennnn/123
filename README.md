@@ -1,62 +1,66 @@
-function updateDashboard() {
+if (dt.Rows.Count == 0)
+{
+    gvAttendance.DataSource = null;
+    gvAttendance.DataBind();
+    pnlGrid.Visible = false;
 
-    var rows = document.querySelectorAll(
-        "#<%= gvAttendance.ClientID %> tr");
-
-    var total = 0;
-    var present = 0;
-    var absent = 0;
-    var offDay = 0;
-    var leave = 0;
-    var holiday = 0;
-    var halfDay = 0;
-
-    rows.forEach(function (row) {
-
-        var chk = row.querySelector(
-            "input[type='checkbox'][id*='chkPresent']");
-        var dayDef = row.querySelector(
-            "select[id*='ddlDayDef']");
-
-        if (!chk || !dayDef) return;
-
-        total++;
-
-        var def = dayDef.value;
-
-        // ✅ COUNT ONLY WHEN CHECKED
-        if (chk.checked) {
-            switch (def) {
-                case "WD":
-                    present++;
-                    break;
-                case "OD":
-                    offDay++;
-                    break;
-                case "L":
-                    leave++;
-                    break;
-                case "NH":
-                    holiday++;
-                    break;
-                case "HF":
-                    halfDay++;
-                    break;
-            }
-        }
-        // ❌ UNCHECKED → only WD becomes Absent
-        else {
-            if (def === "WD") {
-                absent++;
-            }
-        }
-    });
-
-    document.getElementById("dashTotal").textContent = total;
-    document.getElementById("dashPresent").textContent = present;
-    document.getElementById("dashAbsent").textContent = absent;
-    document.getElementById("dashOffDay").textContent = offDay;
-    document.getElementById("dashLeave").textContent = leave;
-    document.getElementById("dashHoliday").textContent = holiday;
-    document.getElementById("dashHalfDay").textContent = halfDay;
+    lblRowCount.Text = "0";
+    litMessage.Text =
+        "<div class='message err'>No attendance dates available for this workman in the selected month (DOJ / DOE restriction).</div>";
+    return;
 }
+
+
+
+
+protected void ddlAadhar_SelectedIndexChanged(object sender, EventArgs e)
+{
+    // Clear text fields
+    txtName.Text = "";
+    txtSlNo.Text = "";
+    txtCategory.Text = "";
+    txtVname.Text = "";
+    txtVcode.Text = "";
+
+    // Clear grid + state
+    gvAttendance.DataSource = null;
+    gvAttendance.DataBind();
+    pnlGrid.Visible = false;
+
+    lblRowCount.Text = "0";
+    litMessage.Text = "";
+
+    ViewState["ExistingAttendance"] = null;
+
+    // If nothing selected, stop here
+    if (string.IsNullOrEmpty(ddlAadhar.SelectedValue))
+        return;
+
+    string aadhar = ddlAadhar.SelectedValue;
+
+    // Reload employee details
+    using (var cn = new SqlConnection(_connString))
+    using (var cmd = new SqlCommand(
+        @"SELECT Name, WorkManSlNo, WorkManCategory, VendorName, VendorCode
+          FROM App_EmployeeMaster
+          WHERE AadharCard = @Aadhar
+            AND VendorCode = @VendorCode", cn))
+    {
+        cmd.Parameters.AddWithValue("@Aadhar", aadhar);
+        cmd.Parameters.AddWithValue("@VendorCode", Session["UserName"].ToString());
+
+        cn.Open();
+        using (var dr = cmd.ExecuteReader())
+        {
+            if (dr.Read())
+            {
+                txtName.Text = dr["Name"].ToString();
+                txtSlNo.Text = dr["WorkManSlNo"].ToString();
+                txtCategory.Text = dr["WorkManCategory"].ToString();
+                txtVname.Text = dr["VendorName"].ToString();
+                txtVcode.Text = dr["VendorCode"].ToString();
+            }
+        }
+    }
+}
+
