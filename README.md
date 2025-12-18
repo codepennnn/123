@@ -1,3 +1,12 @@
+
+<asp:TextBox 
+    ID="Contractors_Establishment_Worked"
+    runat="server"
+    CssClass="form-control form-control-sm font-small"
+    oninput="validateIntInput(this,154);">
+</asp:TextBox>
+
+
 <script type="text/javascript">
     function validateIntInput(txt, max) {
 
