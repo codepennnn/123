@@ -1,44 +1,60 @@
-public bool CheckExist(string VendorCode, string workOrderNo)
+string vendorCode = Session["UserName"].ToString();
+
+foreach (string wo in workOrders)
 {
-    string StrSQL = @"
-        SELECT 1
+    DataRow existingRow = blobj.GetLatestApplication(vendorCode, wo.Trim());
+
+    if (existingRow != null)
+    {
+        string status = existingRow["Status"].ToString();
+
+        // ❌ Block
+        if (status == "Pending With CC" || status == "Approved")
+        {
+            MyMsgBox.show(
+                CLMS.Control.MyMsgBox.MessageType.Errors,
+                $"Application already exists for Work Order {wo} and is under process."
+            );
+            return;
+        }
+
+        // ✅ Returned → Update same application
+        if (status == "Returned")
+        {
+            PageRecordDataSet.Tables["App_WorkOrder_Exemption"]
+                .Rows[0]["ID"] = existingRow["ID"];
+
+            PageRecordDataSet.Tables["App_WorkOrder_Exemption"]
+                .Rows[0]["Status"] = "Pending With CC";
+
+            PageRecordDataSet.Tables["App_WorkOrder_Exemption"]
+                .Rows[0]["ResubmittedOn"] = DateTime.Now;
+
+            PageRecordDataSet.Tables["App_WorkOrder_Exemption"]
+                .Rows[0]["ResubmittedBy"] = vendorCode;
+        }
+    }
+}
+
+public DataRow GetLatestApplication(string vendorCode, string workOrderNo)
+{
+    string sql = @"
+        SELECT TOP 1 *
         FROM App_WorkOrder_Exemption
         WHERE VendorCode = @VendorCode
           AND ',' + WorkOrderNo + ',' LIKE '%,' + @WorkOrderNo + ',%'
-          AND Status IN ('Pending With CC', 'Approved')
-    ";
+        ORDER BY CreatedOn DESC";
 
-    Dictionary<string, object> objParam = new Dictionary<string, object>();
-    objParam.Add("@VendorCode", VendorCode);
-    objParam.Add("@WorkOrderNo", workOrderNo);
+    Dictionary<string, object> param = new Dictionary<string, object>();
+    param.Add("@VendorCode", vendorCode);
+    param.Add("@WorkOrderNo", workOrderNo);
 
     DataHelper dh = new DataHelper();
-    DataSet ds = dh.GetDataset(StrSQL, "App_WorkOrder_Exemption", objParam);
+    DataSet ds = dh.GetDataset(sql, "App_WorkOrder_Exemption", param);
 
-    return ds != null 
-        && ds.Tables.Count > 0 
-        && ds.Tables[0].Rows.Count > 0;
-}
+    if (ds != null && ds.Tables[0].Rows.Count > 0)
+        return ds.Tables[0].Rows[0];
 
-
-  string vendorCode = Session["UserName"].ToString();
-
-string[] selectedWorkOrders = PageRecordDataSet.Tables["App_WorkOrder_Exemption"]
-                               .Rows[0]["WorkOrderNo"]
-                               .ToString()
-                               .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
-foreach (string wo in selectedWorkOrders)
-{
-    bool exists = blobj.IsWorkOrderAlreadySubmitted(vendorCode, wo.Trim());
-
-    if (exists)
-    {
-        MyMsgBox.show(
-            CLMS.Control.MyMsgBox.MessageType.Errors,
-            $"Application already exists for Work Order No: {wo}. Re-submission is not allowed."
-        );
-        return;
-    }
+    return null;
 }
 
