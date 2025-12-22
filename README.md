@@ -1,175 +1,299 @@
-<style>
-/* ================= GRID BASE ================= */
-.grid-wrapper {
-    width: 100%;
-    max-height: 250px;
-    overflow: auto;
-    border: 1px solid #cfd8e3;
-    background: #ffffff;
-}
+  protected void btnSave_Click(object sender, EventArgs e)
+  {
 
-.styled-grid {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: "Segoe UI", Arial, sans-serif;
-    font-size: 12px;
-}
 
-/* ================= HEADER ================= */
-.styled-grid th {
-    background: #003570;
-    color: #ffffff;
-    padding: 8px 6px;
-    text-align: center;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.3;
-    border: 1px solid #d0d7e2;
-}
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Wage"] = 0;
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["PfEsi"] = 0;
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Leave"] = 0;
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Bonus"] = 0;
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["LL"] = 0;
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Grievance"] = 0;
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Notice"] = 0;
 
-/* ================= ROWS ================= */
-.styled-grid td {
-    padding: 6px 6px;
-    vertical-align: top;
-    white-space: normal;
-    word-break: break-word;
-    line-height: 1.4;
-    border: 1px solid #e1e6ef;
-}
 
-/* Alternate rows */
-.styled-grid tr:nth-child(even) {
-    background-color: #f5f8fc;
-}
+      if (((CheckBox)WorkOrder_Exemption_Record.Rows[0].FindControl("Wage")).Checked)
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Wage"] = 1;
 
-/* Hover */
-.styled-grid tr:hover {
-    background-color: #eaf2ff;
-}
+      if (((CheckBox)WorkOrder_Exemption_Record.Rows[0].FindControl("PfEsi")).Checked)
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["PfEsi"] = 1;
 
-/* ================= COLUMN TYPES ================= */
-.wrap-col {
-    max-width: 220px;
-    min-width: 180px;
-}
+      if (((CheckBox)WorkOrder_Exemption_Record.Rows[0].FindControl("Leave")).Checked)
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Leave"] = 1;
 
-.num-col {
-    width: 70px;
-    text-align: center;
-}
+      if (((CheckBox)WorkOrder_Exemption_Record.Rows[0].FindControl("Bonus")).Checked)
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Bonus"] = 1;
 
-.ddl-col {
-    width: 150px;
-}
+      if (((CheckBox)WorkOrder_Exemption_Record.Rows[0].FindControl("LL")).Checked)
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["LL"] = 1;
 
-/* ================= INPUTS ================= */
-.styled-grid input,
-.styled-grid select {
-    font-size: 11px;
-    padding: 3px 4px;
-}
-</style>
+      if (((CheckBox)WorkOrder_Exemption_Record.Rows[0].FindControl("Grievance")).Checked)
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Grievance"] = 1;
+
+      if (((CheckBox)WorkOrder_Exemption_Record.Rows[0].FindControl("Notice")).Checked)
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Notice"] = 1;
 
 
 
 
-<div class="grid-wrapper">
 
-<cc1:DetailsContainer 
-    ID="HalfYearly_Records"
-    runat="server"
-    AutoGenerateColumns="False"
-    AllowPaging="False"
-    GridLines="Both"
-    DataMember="App_Half_Yearly_Details"
-    DataKeyNames="ID"
-    DataSource="<%# PageRecordDataSet %>"
-    CssClass="styled-grid">
 
-    <Columns>
+      string selectedWorkorder = string.Join(",", ((CheckBoxList)WorkOrder_Exemption_Record.Rows[0].FindControl("WorkOrderNo")).Items.
+      Cast<ListItem>().Where(li => li.Selected).Select(li => li.Value));
 
-        <!-- Sl No -->
-        <asp:TemplateField HeaderText="Sl No">
-            <ItemTemplate>
-                <%# Container.DataItemIndex + 1 %>
-            </ItemTemplate>
-            <ItemStyle CssClass="num-col" />
-        </asp:TemplateField>
+      //PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["WorkOrderNo"] = selectedWorkorder;
 
-        <!-- Contractor -->
-        <asp:BoundField DataField="Name_Address_Of_Contractor"
-            HeaderText="Contractor Name & Address">
-            <ItemStyle CssClass="wrap-col" />
-        </asp:BoundField>
 
-        <!-- Establishment -->
-        <asp:TemplateField HeaderText="Establishment">
-            <ItemTemplate>
-                <asp:DropDownList 
-                    ID="Name_Address_Of_Establishment"
-                    runat="server"
-                    CssClass="form-control form-control-sm ddl-col">
-                    <asp:ListItem>Tata Steel UISL Jamshedpur</asp:ListItem>
-                    <asp:ListItem>Tata Steel UISL Seraikela</asp:ListItem>
-                </asp:DropDownList>
-            </ItemTemplate>
-        </asp:TemplateField>
+      //string strRemarks = PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Remarks"].ToString();
+      
+      
+      WorkOrder_Exemption_Record.UnbindData();
+      BL_WorkOrder_Exemption blobj = new BL_WorkOrder_Exemption();
 
-        <!-- State -->
-        <asp:BoundField DataField="State" HeaderText="State">
-            <ItemStyle CssClass="num-col" />
-        </asp:BoundField>
+      string Workordercomma = PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["WorkOrderNo"].ToString();
+      string WorkOrderTrim = Workordercomma.TrimEnd(',');
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["WorkOrderNo"] = WorkOrderTrim;
 
-        <!-- Principal Employer -->
-        <asp:TemplateField HeaderText="Principal Employer">
-            <ItemTemplate>
-                <asp:DropDownList 
-                    ID="Name_and_Address_Of_PrincipalEmp"
-                    runat="server"
-                    CssClass="form-control form-control-sm ddl-col">
-                    <asp:ListItem></asp:ListItem>
-                    <asp:ListItem>Tata Steel Limited</asp:ListItem>
-                    <asp:ListItem>Tata Steel UISL</asp:ListItem>
-                    <asp:ListItem>Others</asp:ListItem>
-                </asp:DropDownList>
-            </ItemTemplate>
-        </asp:TemplateField>
 
-        <!-- Licence -->
-        <asp:BoundField DataField="LabourLicNo" HeaderText="Licence No">
-            <ItemStyle CssClass="num-col" />
-        </asp:BoundField>
 
-        <!-- Capacity -->
-        <asp:BoundField DataField="workerno" HeaderText="Capacity">
-            <ItemStyle CssClass="num-col" />
-        </asp:BoundField>
+      string getFileName2 = "";
+      List<string> FileList2 = new List<string>();
+      if (((FileUpload)WorkOrder_Exemption_Record.Rows[0].FindControl("DbstsAttachment")).HasFile)
+      {
+          foreach (HttpPostedFile htfiles in ((FileUpload)WorkOrder_Exemption_Record.Rows[0].FindControl("DbstsAttachment")).PostedFiles)
+          {
+              getFileName2 = PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["ID"].ToString() + "_" + Path.GetFileName(htfiles.FileName);
+              getFileName2 = Regex.Replace(getFileName2, @"[,+*/?|><&=\#%:;@[^$?:'()!~}{`]", "");
+              htfiles.SaveAs((@"D:/Cybersoft_Doc/CLMS/Attachments/" + getFileName2));
+              FileList2.Add(getFileName2);
+          }
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["DbstsAttachment"] = string.Join(",", FileList2);
+      }
 
-        <!-- Contractor Establishment Worked -->
-        <asp:TemplateField HeaderText="Establishment Worked">
-            <ItemTemplate>
-                <asp:TextBox 
-                    ID="Contractors_Establishment_Worked"
-                    runat="server"
-                    CssClass="form-control form-control-sm"
-                    Style="width:90%;"
-                    oninput="validateIntInput(this,154);">
-                </asp:TextBox>
-            </ItemTemplate>
-        </asp:TemplateField>
 
-        <!-- Sex -->
-        <asp:BoundField DataField="sex_M" HeaderText="M">
-            <ItemStyle CssClass="num-col" />
-        </asp:BoundField>
 
-        <asp:BoundField DataField="sex_F" HeaderText="F">
-            <ItemStyle CssClass="num-col" />
-        </asp:BoundField>
+      string getFileName3 = "";
+      List<string> FileList3 = new List<string>();
+      if (((FileUpload)WorkOrder_Exemption_Record.Rows[0].FindControl("ComplianceAttachment")).HasFile)
+      {
+          foreach (HttpPostedFile htfiles in ((FileUpload)WorkOrder_Exemption_Record.Rows[0].FindControl("ComplianceAttachment")).PostedFiles)
+          {
+              getFileName3 = PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["ID"].ToString() + "_" + Path.GetFileName(htfiles.FileName);
+              getFileName3 = Regex.Replace(getFileName3, @"[,+*/?|><&=\#%:;@[^$?:'()!~}{`]", "");
+              htfiles.SaveAs((@"D:/Cybersoft_Doc/CLMS/Attachments/" + getFileName3));
+              FileList3.Add(getFileName3);
+          }
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["ComplianceAttachment"] = string.Join(",", FileList3);
+      }
 
-    </Columns>
 
-</cc1:DetailsContainer>
 
-</div>
 
+
+
+
+      DataTable remarksTable = PageRecordDataSet.Tables["App_WorkOrder_exemption_remarks"];
+      Guid masterID = Guid.Parse(PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["ID"].ToString());
+
+      if (remarksTable.Rows.Count == 0)
+      {
+          DataRow newRow = remarksTable.NewRow();
+
+          newRow["ID"] = Guid.NewGuid();
+
+
+
+          string getFileName = "";
+          List<string> FileList = new List<string>();
+          if (((FileUpload)Attachment).HasFile)
+          {
+              foreach (HttpPostedFile htfiles in ((FileUpload)Attachment).PostedFiles)
+              {
+                  getFileName = newRow["ID"].ToString() + "_" + Path.GetFileName(htfiles.FileName);
+                  getFileName = Regex.Replace(getFileName, @"[,+*/?|><&=\#%:;@[^$?:'()!~}{`]", "");
+                  htfiles.SaveAs((@"D:/Cybersoft_Doc/CLMS/Attachments/" + getFileName));
+                  FileList.Add(getFileName);
+              }
+              newRow["Attachment"] = string.Join(",", FileList);
+          }
+
+
+
+
+
+
+          newRow["MASTER_ID"] = masterID;
+          newRow["Remarks"] = Remarks.Text;
+          newRow["CreatedOn"] = DateTime.Now;
+          newRow["CreatedBy"] = Session["UserName"].ToString();
+
+
+
+          remarksTable.Rows.Add(newRow);
+      }
+
+
+
+
+      PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Status"] = "Pending With CC";
+
+      if (PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0].RowState.ToString() == "Modified")
+      {
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["ResubmittedOn"] = System.DateTime.Now;
+          PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["ResubmittedBy"] = Session["UserName"].ToString();
+      }
+
+
+
+
+
+
+
+
+
+
+
+      //if (PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Remarks"].ToString() == "")
+      //{
+      //    PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Remarks"] = strRemarks + "( VENDOR --" + System.DateTime.Now.ToString("dd/MM/yyyy")
+      //        + " -- " + ((TextBox)WorkOrder_Exemption_Record.Rows[0].FindControl("Remarks")).Text + ")|";
+      //}
+      //else
+      //{
+      //    PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Remarks"] = strRemarks + "( VENDOR --" + System.DateTime.Now.ToString("dd/MM/yyyy")
+      //        + " -- " + ((TextBox)WorkOrder_Exemption_Record.Rows[0].FindControl("Remarks")).Text + ")|";
+      //}
+
+
+      //validation for checkboxlist
+      int count = 0;
+      foreach (ListItem lstitem in ((CheckBoxList)WorkOrder_Exemption_Record.Rows[0].FindControl("WorkOrderNo")).Items)
+      {
+          if (lstitem.Selected == true)
+              count++;
+      }
+      if (count == 0)
+      {
+
+          MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors, "Please Select atleast one workorder no. !!");
+          return;
+      }
+
+
+      //validation - Approved work orders should not be repeated within the exempted period defined by the CC team
+
+      string[] workOrders = PageRecordDataSet.Tables["App_WorkOrder_Exemption"]
+                                 .Rows[0]["WorkOrderNo"]
+                                 .ToString()
+                                 .Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+      foreach (string wo in workOrders)
+      {
+          List<string> conflicts = blobj.GetWorkOrdersInExemptionPeriod(wo.Trim());
+
+          if (conflicts.Any())
+          {
+              string joined = string.Join(", ", conflicts);
+              MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors,
+                  $"The following work orders are already approved and still within the exemption period: {joined}. Duplicate not allowed!");
+              return;
+          }
+      }
+
+
+
+
+    
+
+
+
+
+      bool result = Save();
+
+      if (result)
+      {
+
+          string v_code = Session["UserName"].ToString();
+          string v_name = "";
+          string wo_no = PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["WorkOrderNo"].ToString();
+          string subject = "";
+          string msg = "";
+          string cc = "";
+          DataSet ds = new DataSet();
+          DataSet ds1 = new DataSet();
+          BL_Send_Mail blobj1 = new BL_Send_Mail();
+          ds = blobj1.Get_Vendor_mail(Session["UserName"].ToString());
+          if (ds != null && ds.Tables[0].Rows.Count > 0)
+          {
+              cc = ds.Tables["aspnet_Membership"].Rows[0]["Email"].ToString();
+          }
+
+          ds1 = blobj1.Get_Vendor_name(v_code);
+          if (ds1 != null && ds1.Tables[0].Rows.Count > 0)
+          {
+              v_name = ds1.Tables["App_vendor_reg"].Rows[0]["v_name"].ToString();
+          }
+
+
+
+          //subject = "Application for WorkOrder Exemption has been submitted or updated by M/S  " + v_name + " (Vendor Code – " + v_code + " ) ";
+          //msg = "<html><body><P><B>"
+          //              + "To<BR /> "
+          //              + "Contractor Cell <BR/>"
+          //              + "<BR />Dear Sir/Madam"
+          //              + "<BR /> "
+
+          //              + "M/s " + v_name + " (" + v_code + ") has submitted Work Order Registration application against Work Order " + wo_no + ", request you to please do the needful as soon as possible.<BR/>"
+
+          //              + "<BR />Link :- https://services.tsuisl.co.in/CLMS "
+          //              + " <BR /> " + " <BR /> Thanks & Regards " + " <BR /> "
+          //              + " <BR /> TATA STEEL UISL Contractor's Cell </B></P></html></body>"
+          //              + " <BR /> "
+          //              + " <BR /> Note: Please do not reply as it is a system generated mail. ";
+
+
+          //blobj1.sendmail_request("", cc, subject, msg, "");
+
+
+
+          subject = "Submission of Application for Interim Bill Submission – M/s " + v_name + " (Vendor Code: " + v_code + ") – Work Order No(s): " + wo_no;
+
+
+          msg = "<html><body><p>"
+                        + "<b>To: </b><br/>Contractors’ Cell<br/><br/>"
+                             + "<b>Cc:</b> M/s " + v_name + " (Vendor Code: " + v_code + ")<br/><br/>"
+                        + "Dear Sir/Madam,<br/><br/>"
+                        + "M/s " + v_name + " (Vendor Code: " + v_code + ") has submitted an application through the "
+                        + "“WorkOrder Exemption (Billing)” module in CLMS, requesting additional time to complete compliance updates "
+                        + "and seeking permission to submit bills in the interim against Work Order No(s): " + wo_no + ".<br/><br/>"
+                        + "Kindly review the application and take necessary action at the earliest.<br/><br/>"
+                        + "You may access the application via the following link: "
+                        + "<a href='https://services.tsuisl.co.in/CLMS'>https://services.tsuisl.co.in/CLMS</a><br/><br/>"
+                        + "Thanks & Regards,<br/>"
+                        + "<b>TATA Steel UISL</b><br/>"
+                        + "<b>Contractors’ Cell</b><br/><br/>"
+                        + "<i>Note: This is a system-generated email. Please do not reply.</i>"
+                        + "</p></body></html>";
+
+
+
+
+
+
+
+          PageRecordDataSet.Clear();
+          remarksTable.Clear();
+          Remarks.Text = "";
+          WorkOrder_Exemption_Record.BindData();
+          GetRecords(GetFilterCondition(), WorkOrder_Exemption_Records.PageSize, 10, "");
+          WorkOrder_Exemption_Records.BindData();
+
+          MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Success, "Record saved successfully !");
+          btnSave.Visible = false;
+          DivInputFields.Visible = false;
+
+      }
+      else
+      {
+          MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors, "Error While Saving !");
+      }
+  }
