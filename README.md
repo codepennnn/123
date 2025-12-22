@@ -1,12 +1,25 @@
-     public bool CheckExist(string VendorCode,string workOrderNo)
-     {
-         string StrSQL = "SELECT COUNT(1) FROM App_WorkOrder_Exemption WHERE VendorCode = @VendorCode AND ',' + WorkOrderNo + ',' LIKE '%,' + @WorkOrderNo + ',%'  AND Status IN ('Pending With CC', 'Approved')";
-         Dictionary<string, object> objParam = new Dictionary<string, object>();
-         objParam.Add("VendorCode", VendorCode);
-         objParam.Add("workOrderNo", workOrderNo);
-         DataHelper dh = new DataHelper();
-         return dh.GetDataset(StrSQL, "App_WorkOrder_Exemption", objParam);
-     }
+public bool CheckExist(string VendorCode, string workOrderNo)
+{
+    string StrSQL = @"
+        SELECT 1
+        FROM App_WorkOrder_Exemption
+        WHERE VendorCode = @VendorCode
+          AND ',' + WorkOrderNo + ',' LIKE '%,' + @WorkOrderNo + ',%'
+          AND Status IN ('Pending With CC', 'Approved')
+    ";
+
+    Dictionary<string, object> objParam = new Dictionary<string, object>();
+    objParam.Add("@VendorCode", VendorCode);
+    objParam.Add("@WorkOrderNo", workOrderNo);
+
+    DataHelper dh = new DataHelper();
+    DataSet ds = dh.GetDataset(StrSQL, "App_WorkOrder_Exemption", objParam);
+
+    return ds != null 
+        && ds.Tables.Count > 0 
+        && ds.Tables[0].Rows.Count > 0;
+}
+
 
   string vendorCode = Session["UserName"].ToString();
 
