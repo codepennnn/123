@@ -1,34 +1,46 @@
-private string ShortFileName(string fileName, int length = 20)
-{
-    if (string.IsNullOrEmpty(fileName))
-        return fileName;
-
-    return fileName.Length > length
-        ? fileName.Substring(0, length) + "..."
-        : fileName;
-}
+  string strSQL = "select * ,DATEDIFF(day, CreatedOn,getdate()) as dayscountCreatedOn,DATEDIFF(day, ResubmittedOn, getdate()) as dayscountResub from App_WorkOrder_Exemption  ";
+  DataHelper dh = new DataHelper();
+  Dictionary<string, object> objParam = null;
 
 
-protected void WorkOrder_Exemption_Record_RowDataBound(object sender, GridViewRowEventArgs e)
-{
-    if (e.Row.RowType == DataControlRowType.DataRow)
-    {
-        BulletedList bl = (BulletedList)e.Row.FindControl("Attachment");
 
-        string attachment = DataBinder.Eval(e.Row.DataItem, "Attachment")?.ToString();
+         
 
-        if (!string.IsNullOrEmpty(attachment))
-        {
-            bl.Items.Clear();
 
-            foreach (string file in attachment.Split(','))
-            {
-                bl.Items.Add(new ListItem
-                {
-                    Text = ShortFileName(file, 20), // UI only
-                    Value = file                    // full filename
-                });
-            }
-        }
-    }
-}
+
+  if (FilterConditions != null && FilterConditions.Count > 0)
+  {
+      strSQL += " where ";
+
+      if (FilterConditions["From_COMPLAINT_DATE"] != null && FilterConditions["To_COMPLAINT_DATE"] != null)
+      {
+       
+
+          string ftdt = FilterConditions["From_COMPLAINT_DATE"].Substring(6, 4) + "-" + FilterConditions["From_COMPLAINT_DATE"].Substring(3, 2) + "-" + FilterConditions["From_COMPLAINT_DATE"].Substring(0, 2);
+          string eddt = FilterConditions["To_COMPLAINT_DATE"].Substring(6, 4) + "-" + FilterConditions["To_COMPLAINT_DATE"].Substring(3, 2) + "-" + FilterConditions["To_COMPLAINT_DATE"].Substring(0, 2);
+          strSQL += "CreatedOn >= Convert(datetime, '" + ftdt + "') and CreatedOn <= Convert(datetime, '" + eddt + "')";
+      }
+
+
+
+
+      strSQL += " and Status='" + FilterConditions["Status"] + "'     ";
+
+      if (FilterConditions["Search_With"] != null)
+          strSQL += "and " + FilterConditions["Search_With"] + " like '%" + FilterConditions["Enter_Detail"] + "'   ";
+
+  }
+  if (sortExpression != "")
+      strSQL += "order by " + sortExpression;
+  return dh.GetDataset(strSQL, "App_WorkOrder_Exemption", objParam);
+
+
+
+
+
+  select * ,DATEDIFF(day, CreatedOn,getdate()) as dayscountCreatedOn,DATEDIFF(day, ResubmittedOn, getdate()) as dayscountResub 
+from App_WorkOrder_Exemption   where COMPLAINT_DATE >= Convert(datetime, '2025-12-10') and
+COMPLAINT_DATE <= Convert(datetime, '2025-12-23') and Status='Pending with CC'  
+
+where CreatedOn >= Convert(datetime, '2025-12-10') 
+and CreatedOn <= Convert(datetime, '2025-12-23') and Status='Pending with CC'   
