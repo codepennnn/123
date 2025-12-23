@@ -1,23 +1,34 @@
- <asp:TemplateField HeaderText="Attachment" SortExpression="Attachment">
-     <ItemTemplate>
-         <asp:BulletedList runat="server" ID="Attachment" CssClass="attachment-list" DisplayMode="HyperLink">
-        <asp:ListItem Text='<%# Eval("Attachment").ToString().Length > 20 ? Eval("Attachment").ToString().Substring(0,20) + "..." : Eval("Attachment").ToString() %>' Value='<%# Eval("Attachment") %>' />
-         </asp:BulletedList>
-     </ItemTemplate>
+private string ShortFileName(string fileName, int length = 20)
+{
+    if (string.IsNullOrEmpty(fileName))
+        return fileName;
 
-     </asp:TemplateField>
-
-
-     Parser Error
-Description: An error occurred during the parsing of a resource required to service this request. Please review the following specific parse error details and modify your source file appropriately.
-
-Parser Error Message: Databinding expressions are only supported on objects that have a DataBinding event. System.Web.UI.WebControls.ListItem does not have a DataBinding event.
-
-Source Error:
+    return fileName.Length > length
+        ? fileName.Substring(0, length) + "..."
+        : fileName;
+}
 
 
-Line 565:                                <ItemTemplate>
-Line 566:                                    <asp:BulletedList runat="server" ID="Attachment" CssClass="attachment-list" DisplayMode="HyperLink">
-Line 567:                                   <asp:ListItem Text='<%# Eval("Attachment").ToString().Length > 20 ? Eval("Attachment").ToString().Substring(0,20) + "..." : Eval("Attachment").ToString() %>' Value='<%# Eval("Attachment") %>' />
-Line 568:                                    </asp:BulletedList>
-Line 569:                                </ItemTemplate>
+protected void WorkOrder_Exemption_Record_RowDataBound(object sender, GridViewRowEventArgs e)
+{
+    if (e.Row.RowType == DataControlRowType.DataRow)
+    {
+        BulletedList bl = (BulletedList)e.Row.FindControl("Attachment");
+
+        string attachment = DataBinder.Eval(e.Row.DataItem, "Attachment")?.ToString();
+
+        if (!string.IsNullOrEmpty(attachment))
+        {
+            bl.Items.Clear();
+
+            foreach (string file in attachment.Split(','))
+            {
+                bl.Items.Add(new ListItem
+                {
+                    Text = ShortFileName(file, 20), // UI only
+                    Value = file                    // full filename
+                });
+            }
+        }
+    }
+}
