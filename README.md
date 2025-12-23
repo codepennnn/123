@@ -1,43 +1,48 @@
- function validateCompliance() {
+<script>
+function validateCompliance() {
 
-     var checks = document.querySelectorAll(".compliance-check input[type='checkbox']");
-     var atLeastOne = Array.from(checks).some(cb => cb.checked);
+    // Existing checkbox validation
+    var checks = document.querySelectorAll(".compliance-check input[type='checkbox']");
+    var atLeastOne = Array.from(checks).some(cb => cb.checked);
 
-     if (!atLeastOne) {
-         alert("Please select at least one Compliance Type.");
-         return false;
-     }
-     return true;
- }
+    if (!atLeastOne) {
+        alert("Please select at least one Compliance Type.");
+        return false;
+    }
 
-           <div class="form-inline row">
-               <div class="form-group col-md-6 mb-2">
-                     <label for="lbl_Attachment" class="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6 justify-content-start" >Attachment:</label>
-                         <asp:FileUpload ID="Attachment" runat="server" AllowMultiple="true" Font-Size="Small"/>
-                         <asp:BulletedList ID="Bull_Attach" runat="server" CssClass="font-smaller text-primary attachment-list" DisplayMode="HyperLink" Target="_blank"/>
-          
-       
-                   </div>
+    // File inputs to validate
+    var fileInputs = [
+        document.getElementById('<%= Attachment.ClientID %>'),
+        document.getElementById('<%= DbstsAttachment.ClientID %>'),
+        document.getElementById('<%= ComplianceAttachment.ClientID %>')
+    ];
 
-          
+    var maxFileNameLength = 20;          // characters
+    var maxFileSizeMB = 20;              // MB
+    var maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
 
-             </div>
+    for (var i = 0; i < fileInputs.length; i++) {
+        var input = fileInputs[i];
 
+        if (input && input.files.length > 0) {
+            for (var j = 0; j < input.files.length; j++) {
+                var file = input.files[j];
 
-                 <div runat="server" id="DbstsAttachmentLbl">
-              <div class="form-inline row mt-4 mb-2">
-                  <div class="form-group col-md-4 mb-2">
-                      <label for="lbl_Attachment"  class="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6 justify-content-start">DBSTS Compliance Mail Attachment:<span style="color: #FF0000;">*</span></label>
-                      <asp:FileUpload ID="DbstsAttachment" runat="server"  Font-Size="Small" />
-                 </div>
+                // File name length check
+                if (file.name.length > maxFileNameLength) {
+                    alert("File name must not exceed " + maxFileNameLength + " characters.\nFile: " + file.name);
+                    return false;
+                }
 
-                   <div class="form-group col-md-4 mb-2">
-                       <label for="lbl_Attachment" class="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6 justify-content-start">Offline Compliance Attachment:</label>
-                       <asp:FileUpload ID="ComplianceAttachment" runat="server"  Font-Size="Small"/>
-                    </div>
+                // File size check
+                if (file.size > maxFileSizeBytes) {
+                    alert("File size must not exceed " + maxFileSizeMB + " MB.\nFile: " + file.name);
+                    return false;
+                }
+            }
+        }
+    }
 
-              </div>
-      </div>
-
-
-      i want validation that length and size of file nama should be 20
+    return true;
+}
+</script>
