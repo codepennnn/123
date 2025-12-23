@@ -1,46 +1,43 @@
-  string strSQL = "select * ,DATEDIFF(day, CreatedOn,getdate()) as dayscountCreatedOn,DATEDIFF(day, ResubmittedOn, getdate()) as dayscountResub from App_WorkOrder_Exemption  ";
-  DataHelper dh = new DataHelper();
-  Dictionary<string, object> objParam = null;
+ function validateCompliance() {
 
+     var checks = document.querySelectorAll(".compliance-check input[type='checkbox']");
+     var atLeastOne = Array.from(checks).some(cb => cb.checked);
 
+     if (!atLeastOne) {
+         alert("Please select at least one Compliance Type.");
+         return false;
+     }
+     return true;
+ }
 
-         
-
-
-
-  if (FilterConditions != null && FilterConditions.Count > 0)
-  {
-      strSQL += " where ";
-
-      if (FilterConditions["From_COMPLAINT_DATE"] != null && FilterConditions["To_COMPLAINT_DATE"] != null)
-      {
+           <div class="form-inline row">
+               <div class="form-group col-md-6 mb-2">
+                     <label for="lbl_Attachment" class="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6 justify-content-start" >Attachment:</label>
+                         <asp:FileUpload ID="Attachment" runat="server" AllowMultiple="true" Font-Size="Small"/>
+                         <asp:BulletedList ID="Bull_Attach" runat="server" CssClass="font-smaller text-primary attachment-list" DisplayMode="HyperLink" Target="_blank"/>
+          
        
+                   </div>
 
-          string ftdt = FilterConditions["From_COMPLAINT_DATE"].Substring(6, 4) + "-" + FilterConditions["From_COMPLAINT_DATE"].Substring(3, 2) + "-" + FilterConditions["From_COMPLAINT_DATE"].Substring(0, 2);
-          string eddt = FilterConditions["To_COMPLAINT_DATE"].Substring(6, 4) + "-" + FilterConditions["To_COMPLAINT_DATE"].Substring(3, 2) + "-" + FilterConditions["To_COMPLAINT_DATE"].Substring(0, 2);
-          strSQL += "CreatedOn >= Convert(datetime, '" + ftdt + "') and CreatedOn <= Convert(datetime, '" + eddt + "')";
-      }
+          
 
-
+             </div>
 
 
-      strSQL += " and Status='" + FilterConditions["Status"] + "'     ";
+                 <div runat="server" id="DbstsAttachmentLbl">
+              <div class="form-inline row mt-4 mb-2">
+                  <div class="form-group col-md-4 mb-2">
+                      <label for="lbl_Attachment"  class="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6 justify-content-start">DBSTS Compliance Mail Attachment:<span style="color: #FF0000;">*</span></label>
+                      <asp:FileUpload ID="DbstsAttachment" runat="server"  Font-Size="Small" />
+                 </div>
 
-      if (FilterConditions["Search_With"] != null)
-          strSQL += "and " + FilterConditions["Search_With"] + " like '%" + FilterConditions["Enter_Detail"] + "'   ";
+                   <div class="form-group col-md-4 mb-2">
+                       <label for="lbl_Attachment" class="m-0 mr-2 p-0 col-form-label-sm col-sm-3 font-weight-bold fs-6 justify-content-start">Offline Compliance Attachment:</label>
+                       <asp:FileUpload ID="ComplianceAttachment" runat="server"  Font-Size="Small"/>
+                    </div>
 
-  }
-  if (sortExpression != "")
-      strSQL += "order by " + sortExpression;
-  return dh.GetDataset(strSQL, "App_WorkOrder_Exemption", objParam);
-
-
+              </div>
+      </div>
 
 
-
-  select * ,DATEDIFF(day, CreatedOn,getdate()) as dayscountCreatedOn,DATEDIFF(day, ResubmittedOn, getdate()) as dayscountResub 
-from App_WorkOrder_Exemption   where COMPLAINT_DATE >= Convert(datetime, '2025-12-10') and
-COMPLAINT_DATE <= Convert(datetime, '2025-12-23') and Status='Pending with CC'  
-
-where CreatedOn >= Convert(datetime, '2025-12-10') 
-and CreatedOn <= Convert(datetime, '2025-12-23') and Status='Pending with CC'   
+      i want validation that length and size of file nama should be 20
