@@ -1,44 +1,80 @@
-<script>
-function applyCanteenAndCrechesRules() {
+   protected void Search_Click(object sender, EventArgs e)
+   {
 
-    // Get all grid rows (skip header row)
-    var grid = document.querySelector(".styled-grid");
-    if (!grid) return;
+       BL_Half_Yearly blobj = new BL_Half_Yearly();
+       DataSet ds = new DataSet();
 
-    var rows = grid.querySelectorAll("tr");
 
-    rows.forEach(function (row, index) {
 
-        // Skip header
-        if (index === 0) return;
+       int year = Convert.ToInt32(Year.SelectedValue);
+       string month = SearchPeriod.SelectedValue.ToString();
+       string fromdt = "";
+       string todt = "";
+       string wageMonth = "";
+       string displayPeriod = "";
 
-        // Get Sex(M) and Sex(F) cells (adjust index if column order changes)
-        var maleCell = row.cells[14];   // Sex (M)
-        var femaleCell = row.cells[15]; // Sex (F)
 
-        if (!maleCell || !femaleCell) return;
+       if (month == "Jan-June")
+       {
+           wageMonth = "1,2,3,4,5,6";
+           fromdt = new DateTime(year, 1, 1).ToString("yyyy-MM-dd");
+           todt = new DateTime(year, 6, 30).ToString("yyyy-MM-dd");
 
-        var male = parseInt(maleCell.innerText.trim()) || 0;
-        var female = parseInt(femaleCell.innerText.trim()) || 0;
+           displayPeriod = $"Jan{year.ToString().Substring(2)} - June{year.ToString().Substring(2)}";
+       }
+       else
+       {
+           wageMonth = "7,8,9,10,11,12";
+           fromdt = new DateTime(year, 7, 1).ToString("yyyy-MM-dd");
+           todt = new DateTime(year, 12, 31).ToString("yyyy-MM-dd");
 
-        var totalManpower = male + female;
+           displayPeriod = $"July{year.ToString().Substring(2)} - Dec{year.ToString().Substring(2)}";
+       }
+       string vcode = Session["UserName"].ToString();
+       string Period = SearchPeriod.SelectedValue;
 
-        // Get dropdowns inside row
-        var canteenDDL = row.querySelector("select[id*='Welfare_Canteen']");
-        var crechesDDL = row.querySelector("select[id*='Welfare_Creches']");
 
-        // Apply Canteen rule
-        if (canteenDDL) {
-            canteenDDL.value = (totalManpower >= 100) ? "YES" : "NO";
-        }
 
-        // Apply Creches rule
-        if (crechesDDL) {
-            crechesDDL.value = (female >= 50) ? "YES" : "NO";
-        }
-    });
-}
+       DataSet dsStatus = blobj.GetStatus(vcode, Period, year);
+       if (dsStatus != null && dsStatus.Tables[0].Rows.Count > 0)
+       {
+           string status = dsStatus.Tables[0].Rows[0]["Status"].ToString();
 
-// Call on page load
-document.addEventListener("DOMContentLoaded", applyCanteenAndCrechesRules);
-</script>
+           if (status == "Approved" || status == "Pending With CC")
+           {
+               MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors,
+                              $"This record is already {status}. You cannot modify or upload again.");
+               HalfYearly_Records.Visible = false;
+               btnSave.Visible = false;
+               return;
+           }
+       }
+
+
+
+       ds = blobj.GetData(vcode, fromdt, todt, Period, year, wageMonth);
+
+       if (ds == null || ds.Tables[0].Rows.Count == 0)
+       {
+           PageRecordDataSet.Tables["App_Half_Yearly_Details"].Clear();
+           HalfYearly_Records.BindData();
+
+           MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Errors,
+               "No data found.");
+
+           return;
+       }
+
+
+
+
+
+       PageRecordDataSet.Tables["App_Half_Yearly_Details"].Clear();
+       PageRecordDataSet.Merge(ds);
+       HalfYearly_Records.BindData();
+       HalfYearly_Records.Visible = true;
+       btnSave.Visible = true;
+
+
+
+   }
