@@ -1,22 +1,25 @@
 protected void Search_Click(object sender, EventArgs e)
 {
-    int year = Convert.ToInt32(Year.SelectedValue);
-    string period = SearchPeriod.SelectedValue;
+    int selectedYear = Convert.ToInt32(Year.SelectedValue);
+    string selectedPeriod = SearchPeriod.SelectedValue;
 
-    DateTime today = DateTime.Today;
-    DateTime periodStartDate;
+    // Current YYYYMM
+    int currentYYYYMM = DateTime.Today.Year * 100 + DateTime.Today.Month;
 
-    if (period == "Jan-June")
+    // Selected half-year YYYYMM (June or December)
+    int selectedYYYYMM;
+
+    if (selectedPeriod == "Jan-June")
     {
-        periodStartDate = new DateTime(year, 1, 1);
+        selectedYYYYMM = selectedYear * 100 + 6;   // YYYY06
     }
     else // July-Dec
     {
-        periodStartDate = new DateTime(year, 7, 1);
+        selectedYYYYMM = selectedYear * 100 + 12;  // YYYY12
     }
 
-    // ❌ FUTURE PERIOD VALIDATION
-    if (periodStartDate > today)
+    // ❌ FUTURE PERIOD BLOCK
+    if (currentYYYYMM < selectedYYYYMM)
     {
         MyMsgBox.show(
             CLMS.Control.MyMsgBox.MessageType.Errors,
@@ -27,3 +30,5 @@ protected void Search_Click(object sender, EventArgs e)
         btnSave.Visible = false;
         return;
     }
+
+    // ✅ CONTINUE EXISTING LOGIC BELOW
