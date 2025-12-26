@@ -1,397 +1,96 @@
-<div class="grid-container">
-
-    <cc1:DetailsContainer ID="HalfYearly_Records" runat="server" AutoGenerateColumns="False" AllowPaging="False" CellPadding="0" GridLines="Both" DataMember="App_Half_Yearly_Details"
-        DataKeyNames="ID" DataSource="<%# PageRecordDataSet %>" ForeColor="#333333" ShowHeaderWhenEmpty="False"
-        OnRowDataBound="PF_ESI_Records_RowDataBound" PagerSettings-Visible="False" PagerStyle-HorizontalAlign="Center" RowStyle-ForeColor="Black"
-        PagerStyle-Wrap="False" HeaderStyle-Font-Size="13px" RowStyle-Font-Size="11px" class="border " Style="margin-top: 12px;" CssClass="styled-grid">
-        <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
-        <Columns>
-
-            <asp:TemplateField HeaderText="ID" SortExpression="ID" Visible="False">
-                <ItemTemplate>
-                    <asp:Label ID="ID" runat="server"></asp:Label>
-                </ItemTemplate>
-            </asp:TemplateField>
-            <asp:TemplateField HeaderText="Sl. No.">
-                <ItemTemplate>&emsp;<%# Container.DataItemIndex + 1 + "."%></ItemTemplate>
-                <ItemStyle Width="4%" />
-            </asp:TemplateField>
-            <asp:BoundField DataField="Name_Address_Of_Contractor" HeaderText="Name and Address Of Contractor" SortExpression="Name_Address_Of_Contractor">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-           
-            
-            <asp:TemplateField HeaderText="Name and Address Of Establishment" HeaderStyle-ForeColor="White">
-                <ItemTemplate>
-                                                      
-                    <asp:DropDownList ID="Name_Address_Of_Establishment" runat="server" CssClass="form-control form-control-sm font-small">
-
-                        <asp:ListItem Value="Tata Steel UISL Jamshedpur">Tata Steel UISL Jamshedpur</asp:ListItem>
-                        <asp:ListItem Value="Tata Steel UISL Seraikela">Tata Steel UISL Seraikela</asp:ListItem>
-                        
-
-
-                    </asp:DropDownList>
-                </ItemTemplate>
-            </asp:TemplateField>
-
-
-                                     
-
-                 <asp:BoundField DataField="State" HeaderText="State" SortExpression="State">
-                   <ItemStyle HorizontalAlign="Center" />
-               </asp:BoundField>
-
-
-
-
-
-
-            <asp:TemplateField HeaderText="Principal Employer" HeaderStyle-ForeColor="White">
-                <ItemTemplate>
-                    <asp:DropDownList ID="Name_and_Address_Of_PrincipalEmp" runat="server" CssClass="form-control form-control-sm font-small" Width="200px">
-                        <asp:ListItem></asp:ListItem>
-                        <asp:ListItem Value="Tata Steel Limited">Tata Steel Limited</asp:ListItem>
-                        <asp:ListItem Value="Tata Steel UISL">Tata Steel UISL</asp:ListItem>
-                        <asp:ListItem Value="JUIDCO,Ranchi">JUIDCO,Ranchi</asp:ListItem>
-                        <asp:ListItem Value="Manipal Tata Medical College">Manipal Tata Medical College</asp:ListItem>
-                        <asp:ListItem Value="Tata Steel Foundation">Tata Steel Foundation</asp:ListItem>
-                        <asp:ListItem Value="NINL">NINL</asp:ListItem>
-                        <asp:ListItem Value="Tata Steel FAP, Jajpur">Tata Steel FAP, Jajpur</asp:ListItem>
-                        <asp:ListItem Value="TRF">TRF</asp:ListItem>
-                        <asp:ListItem Value="Tata Pigments Limited">Tata Pigments Limited</asp:ListItem>
-                        <asp:ListItem Value="Tata Steel IBMD">Tata Steel IBMD</asp:ListItem>
-                        <asp:ListItem Value="Others">Others</asp:ListItem>
-                    </asp:DropDownList>
-
-                    
-              <asp:RequiredFieldValidator 
-                            ID="rfvPrincipalEmployer"
-                            runat="server"
-                            ControlToValidate="Name_and_Address_Of_PrincipalEmp"
-                            InitialValue=""
-                            ErrorMessage="Principal Employer is required."
-                            Display="Dynamic"
-                            ForeColor="Red"
-                            ValidationGroup="save" />
-
-                </ItemTemplate>
-            </asp:TemplateField>
-
-
-    
-            <asp:BoundField DataField="LabourLicNo" HeaderText="Lic No" SortExpression="LabourLicNo">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-               <asp:BoundField DataField="workerno" HeaderText="Capacity of Lic" SortExpression="workerno">
-               <ItemStyle HorizontalAlign="Center" />
-           </asp:BoundField>
-
-       
-
-          
-            <asp:TemplateField HeaderText="Weekly Holiday" HeaderStyle-ForeColor="White">
-                <ItemTemplate>
-                   <asp:DropDownList ID="Weekly_Holiday" runat="server" CssClass="form-control form-control-sm font-small">
-     
-                     <asp:ListItem Value="YES">YES</asp:ListItem>
-                     <asp:ListItem Value="NO">NO</asp:ListItem>
-                     <asp:ListItem Value="NA">NA</asp:ListItem>
-   
-
-                    </asp:DropDownList>
-                </ItemTemplate>
-            </asp:TemplateField>
-
-
-            <asp:BoundField DataField="WorkOrderNo" HeaderText="WorkOrderNo" SortExpression="WorkOrderNo">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-            <asp:BoundField DataField="Workorder_FromDate"
-                HeaderText="Workorder_FromDate"
-                SortExpression="Workorder_FromDate"
-                DataFormatString="{0:dd/MM/yyyy}"
-                HtmlEncode="false">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-            <asp:BoundField DataField="Workorder_ToDate"
-                HeaderText="Workorder_ToDate"
-                SortExpression="Workorder_ToDate"
-                DataFormatString="{0:dd/MM/yyyy}"
-                HtmlEncode="false">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-             <asp:BoundField DataField="Establishment_Of_Principal_Emp_Worked" HeaderText="Establishment of principal emp worked" SortExpression="Establishment_Of_Principal_Emp_Worked">
-             <ItemStyle HorizontalAlign="Center" />
-         </asp:BoundField>
-
-
-
-            <asp:TemplateField HeaderText="Contractor establishment had worked" HeaderStyle-ForeColor="White">
-                    <ItemTemplate>
-                        <asp:TextBox ID="Contractors_Establishment_Worked" runat="server" CssClass="form-control form-control-sm font-small"  oninput="validateIntInput(this,154);">>
-                        </asp:TextBox>
-
-                         <asp:RequiredFieldValidator 
-                                ID="rfvCEW"
-                                runat="server"
-                                ControlToValidate="Contractors_Establishment_Worked"
-                                ErrorMessage="This field is required."
-                                ValidationGroup="save"
-                                Display="Dynamic"
-                                ForeColor="Red" />
-
-                          
-
-
-                    </ItemTemplate>
-            </asp:TemplateField>
-
-            <asp:BoundField DataField="sex_M" HeaderText="Sex (M)" SortExpression="sex_M">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-            <asp:BoundField DataField="sex_F" HeaderText="Sex (F)" SortExpression="sex_F">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-            <asp:BoundField DataField="No_Of_Mandays_Worked_Men" HeaderText="Total Mandays (M)" SortExpression="TotalMandays_Male">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-            <asp:BoundField DataField="No_Of_Mandays_Worked_Women" HeaderText="Total Mandays (F)" SortExpression="TotalMandays_Female">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-
-             <asp:BoundField DataField="No_Of_Mandays_Worked_children" HeaderText="Total Mandays (Children)" SortExpression="No_Of_Mandays_Worked_children">
-                 <ItemStyle HorizontalAlign="Center" />
-             </asp:BoundField>
-
-
-         
-
-
-
-
-            <asp:BoundField DataField="Amt_Of_Deduct_From_Wages_Men" HeaderText="Wage Deduction (M)" SortExpression="Male_Deduction">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-            <asp:BoundField DataField="Amt_Of_Deduct_From_Wages_Women" HeaderText="Wage Deduction (F)" SortExpression="Female_Deduction">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-              <asp:BoundField DataField="Amt_Of_Deduct_From_Wages_Children" HeaderText="Wage Deduction (Children)" SortExpression="Amt_Of_Deduct_From_Wages_Children">
-                  <ItemStyle HorizontalAlign="Center" />
-              </asp:BoundField>
-
-
-
-            <asp:BoundField DataField="Amount_Of_Wages_Paid_Men" HeaderText="Gross Wage (M)" SortExpression="Male_Gross">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-            <asp:BoundField DataField="Amount_Of_Wages_Paid_Women" HeaderText="Gross Wage (F)" SortExpression="Female_Gross">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-                <asp:BoundField DataField="Amount_Of_Wages_Paid_Children" HeaderText="Gross Wage (Children)" SortExpression="Amount_Of_Wages_Paid_Children">
-                <ItemStyle HorizontalAlign="Center" />
-            </asp:BoundField>
-
-
-            <asp:TemplateField HeaderText="Canteen">
-                <HeaderStyle BackColor="#ff9933" ForeColor="White" Font-Bold="True" HorizontalAlign="Center" />
-                <ItemTemplate>
-                    <asp:DropDownList ID="Welfare_Canteen" runat="server" CssClass="form-control form-control-sm font-small" Width="110px">
-                        <asp:ListItem Value="YES">YES</asp:ListItem>
-                        <asp:ListItem Value="NA">NA</asp:ListItem>
-
-                    </asp:DropDownList>
-
-                </ItemTemplate>
-            </asp:TemplateField>
-
-
-            <asp:TemplateField HeaderText="Rest Rooms">
-                <HeaderStyle BackColor="#ff9933" ForeColor="White" Font-Bold="True" HorizontalAlign="Center" />
-                <ItemTemplate>
-                    <asp:DropDownList ID="Welfare_RestRoom" runat="server" CssClass="form-control form-control-sm font-small">
-   
-                      <asp:ListItem Value="YES">YES</asp:ListItem>
-                        <asp:ListItem Value="NA">NA</asp:ListItem>
-
-                    </asp:DropDownList>
-
-                </ItemTemplate>
-            </asp:TemplateField>
-
-
-            <asp:TemplateField HeaderText="Drinking Water">
-                <HeaderStyle BackColor="#ff9933" ForeColor="White" Font-Bold="True" HorizontalAlign="Center" />
-                <ItemTemplate>
-                    <asp:DropDownList ID="Welfare_DrinkingWater" runat="server" CssClass="form-control form-control-sm font-small">
-                        
-                        <asp:ListItem Value="YES">YES</asp:ListItem>
-                        <asp:ListItem Value="NA">NA</asp:ListItem>
-                      
-
-                    </asp:DropDownList>
-
-                </ItemTemplate>
-            </asp:TemplateField>
-
-
-            <asp:TemplateField HeaderText="Creches" >
-                <HeaderStyle BackColor="#ff9933" ForeColor="White" Font-Bold="True" HorizontalAlign="Center" />
-                <ItemTemplate>
-                    <asp:DropDownList ID="Welfare_Creches" runat="server" CssClass="form-control form-control-sm font-small" Width="110px">
-                     <asp:ListItem Value="YES">YES</asp:ListItem>
-                        <asp:ListItem Value="NA">NA</asp:ListItem>
-
-                    </asp:DropDownList>
-
-                </ItemTemplate>
-            </asp:TemplateField>
-
-
-              <asp:TemplateField HeaderText="First Aid">
-                  <HeaderStyle BackColor="#ff9933" ForeColor="White" Font-Bold="True" HorizontalAlign="Center" />
-          <ItemTemplate>
-              <asp:DropDownList ID="Welfare_FirstAid" runat="server" CssClass="form-control form-control-sm font-small" Width="110px">
-               <asp:ListItem Value="YES">YES</asp:ListItem>
-                <asp:ListItem Value="NA">NA</asp:ListItem>
-                 
-
-              </asp:DropDownList>
-
-          </ItemTemplate>
-      </asp:TemplateField>
-
-
-
-
-
-
-
-
-
-
-
-
-        </Columns>
-        <EditRowStyle BackColor="#999999" />
-        <FooterStyle BackColor="#003570" ForeColor="White" Font-Bold="True" />
-        <HeaderStyle BackColor="#003570" Font-Bold="True" ForeColor="White" HorizontalAlign="Center" />
-        <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
-        <SelectedRowStyle BackColor="#E2DED6" Font-Bold="False" ForeColor="#333333" />
-        <SortedAscendingCellStyle BackColor="#E9E7E2" />
-        <SortedAscendingHeaderStyle BackColor="#506C8C" />
-        <SortedDescendingCellStyle BackColor="#FFFDF8" />
-        <SortedDescendingHeaderStyle BackColor="#6F8DAE" />
+<div class="grid-wrapper">
+    <cc1:DetailsContainer 
+        ID="HalfYearly_Records"
+        runat="server"
+        CssClass="styled-grid modern-grid"
+        AutoGenerateColumns="False"
+        GridLines="None"
+        Width="100%">
     </cc1:DetailsContainer>
 </div>
 
-    <style type="text/css">
 
-
-
-
-
-
-
-        .ImageButton {
-    animation: blink 1s infinite;
+.grid-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid #dcdcdc;
+    background: #ffffff;
+    padding: 8px;
 }
 
-@keyframes blink {
-    0% { opacity: 1; }
-    50% { opacity: 0; }
-    100% { opacity: 1; }
+/* TABLE */
+.modern-grid table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    min-width: 2200px; /* IMPORTANT */
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
+/* HEADER */
+.modern-grid th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: #003570 !important;
+    color: #ffffff !important;
+    padding: 10px 8px !important;
+    font-size: 13px !important;
+    font-weight: 600;
+    white-space: nowrap;
+    border-bottom: 2px solid #002447;
+}
 
-        #HalfYearly_Records {
-            height: auto;
-            width: 100%;
-            overflow-x: auto;
-            overflow-y: hidden;
-            margin-top: 10px;
-            border: 1px solid #ddd;
-            padding-bottom: 5px;
-            border-radius: 8px;
-            background: #fff;
-            white-space: nowrap;
-            min-height: 200px;
-        }
+/* ROWS */
+.modern-grid td {
+    padding: 8px 6px !important;
+    font-size: 12px !important;
+    text-align: center;
+    border-bottom: 1px solid #e3e3e3;
+    white-space: nowrap;
+}
 
+/* STRIPED ROWS */
+.modern-grid tr:nth-child(even) td {
+    background: #f9fbfd;
+}
 
-        .grid-container {
-            width: 100%;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            white-space: nowrap;
-        }
+.modern-grid tr:nth-child(odd) td {
+    background: #ffffff;
+}
 
-        .styled-grid table {
-            /*background:#f7f7f7 !important;
-           border-collapse:separate !important;
-           border-spacing:0 10px !important;*/
-            border-collapse: separate !important;
-            border-spacing: 0 6px !important;
-            background: #e9e9e9 !important;
-        }
+/* HOVER */
+.modern-grid tr:hover td {
+    background: #eaf3ff !important;
+}
 
-        .styled-grid th {
-            
-            color: white !important;
-            padding: 3px 6px !important; /*yet*/
-            font-size: 13px !important;
-            text-align: center !important;
-        }
+/* INPUTS & DROPDOWNS */
+.modern-grid input,
+.modern-grid select {
+    width: 100%;
+    height: 30px;
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid #cfcfcf;
+}
 
-        .styled-grid tr:nth-child(odd) td {
-            background: #f5f5f5 !important;
-            padding: 3px 6px !important; /*yet*/
-            font-size: 13px !important;
-            border: 1px solid #d0d0d0 !important;
-        }
+/* WELFARE SECTION (ORANGE HEADERS) */
+.modern-grid th[style*="#ff9933"] {
+    background: #ff9933 !important;
+    color: #fff !important;
+}
 
-        .styled-grid tr:nth-child(even) td {
-            background: #e0e0e0 !important;
-            padding: 3px 6px !important; /*yet*/
-            font-size: 13px !important;
-            border: 1px solid #c8c8c8 !important;
-        }
+/* SCROLLBAR (OPTIONAL BUT NICE) */
+.grid-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
 
-        .styled-grid tr td:first-child {
-            border-radius: 6px 0 0 6px !important;
-        }
+.grid-wrapper::-webkit-scrollbar-thumb {
+    background: #b5c7e3;
+    border-radius: 10px;
+}
 
-        .styled-grid tr td:last-child {
-            border-radius: 0 6px 6px 0 !important;
-        }
-
-        .styled-grid tr:hover td {
-            background: #d8d8d8 !important;
-        }
-        
-
-
-
-    </style>
+.grid-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
