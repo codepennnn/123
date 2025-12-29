@@ -1,102 +1,107 @@
-<style>
-    .ack-box {
-        border: 1px solid #e0e0e0;
-        border-left: 5px solid #0d6efd;
-        background: #f8f9fa;
-        padding: 15px 18px;
-        border-radius: 6px;
-        font-size: 14px;
-        margin-top: 15px;
-    }
 
-    .ack-title {
-        font-weight: 600;
-        color: #0d6efd;
-        margin-bottom: 8px;
-    }
+   <script type="text/javascript">
 
-    .ack-box ul {
-        margin: 0 0 10px 18px;
-        padding: 0;
-    }
+       document.addEventListener('DOMContentLoaded', function () {
 
-    .ack-box li {
-        margin-bottom: 6px;
-    }
+           var allBox = document.querySelector('.select-all input[type="checkbox"]');
 
-    .ack-check {
-        display: flex;
-        align-items: flex-start;
-        margin-top: 12px;
-    }
+           var itemBoxes = document.querySelectorAll('.item-check input[type="checkbox"]');
 
-    .ack-check input {
-        margin-right: 8px;
-        margin-top: 4px;
-        transform: scale(1.2);
-        cursor: pointer;
-    }
 
-    .ack-error {
-        color: #dc3545;
-        font-size: 13px;
-        margin-top: 6px;
-        display: none;
-    }
-</style>
+           allBox.addEventListener('change', function () {
+               itemBoxes.forEach(function (cb) {
+                   cb.checked = allBox.checked;
+               });
+           });
 
-<div class="ack-box">
-    <div class="ack-title">
-        📌 Mandatory Acknowledgement for Bill Exemption Request
-    </div>
 
-    <p>
-        As a standard practice, please ensure that the following details / documents
-        are shared while requesting for <strong>Bill Exemptions</strong>:
-    </p>
+           itemBoxes.forEach(function (cb) {
+               cb.addEventListener('change', function () {
 
-    <ul>
-        <li>
-            Mail copy of <strong>DBSTS compliance dashboard</strong> against each
-            work order to be enclosed.
-        </li>
-        <li>
-            <strong>Payment proofs or HR clearance</strong> (for Odisha locations)
-            to be enclosed if offline compliance is already done.
-        </li>
-        <li>
-            <strong>Action plan with deadline / timeline</strong> to ensure that
-            all pending compliances are updated in the portal within the same
-            timelines. This will be reviewed by the <strong>Contractors’ Cell</strong>
-            in the next bill exemption application.
-        </li>
-    </ul>
+                   allBox.checked = Array.from(itemBoxes).every(function (c) { return c.checked; });
+               });
+           });
 
-    <div class="ack-check">
-        <input type="checkbox" id="chkAcknowledgement" />
-        <label for="chkAcknowledgement">
-            I confirm that I have read, understood, and attached all the above
-            documents as applicable.
-        </label>
-    </div>
 
-    <div class="ack-error" id="ackError">
-        ⚠ Please acknowledge the above declaration to proceed.
-    </div>
-</div>
-<script>
-function validateAcknowledgement() {
-    var chk = document.getElementById("chkAcknowledgement");
-    var err = document.getElementById("ackError");
 
-    if (!chk.checked) {
-        err.style.display = "block";
-        chk.focus();
-        return false;
-    }
+       });
 
-    err.style.display = "none";
-    return true;
-}
-</script>
 
+       function validateCompliance() {
+
+           var checks = document.querySelectorAll(".compliance-check input[type='checkbox']");
+           var atLeastOne = Array.from(checks).some(cb => cb.checked);
+
+           if (!atLeastOne) {
+               alert("Please select at least one Compliance Type.");
+               return false;
+           }
+
+           var fileInput = document.getElementById("MainContent_WorkOrder_Exemption_Record_DbstsAttachment_0");
+           if (fileInput.value === "") {
+               alert("Please upload the DBSTS mail attachment.");
+               return false;
+           }
+
+           var fileInput2 = document.getElementById("MainContent_WorkOrder_Exemption_Record_ComplianceAttachment_0");
+           if (fileInput2.value === "") {
+               alert("Please upload the Payment Proof / HR Clearance Copy attachment.");
+               return false;
+           }
+
+         
+           
+           var fileInp = [
+               document.getElementById("MainContent_WorkOrder_Exemption_Record_DbstsAttachment_0"),
+               document.getElementById("MainContent_WorkOrder_Exemption_Record_ComplianceAttachment_0"),
+               document.getElementById("MainContent_Attachment")
+           ];
+
+           var maxFileNameLength = 20;        
+           var maxFileSizeMB = 5;             
+           var maxFileSizeBytes = maxFileSizeMB * 1024 * 1024;
+
+           for (var i = 0; i < fileInp.length; i++) {
+               var input = fileInp[i];
+
+               if (input && input.files.length > 0) {
+                   for (var j = 0; j < input.files.length; j++) {
+                       var file = input.files[j];
+
+                      
+                       if (file.name.length > maxFileNameLength) {
+                           alert("File name must not exceed " + maxFileNameLength + " characters.\nFile: " + file.name);
+                           return false;
+                       }
+
+                       
+                       if (file.size > maxFileSizeBytes) {
+                           alert("File size must not exceed " + maxFileSizeMB + " MB.\nFile: " + file.name);
+                           return false;
+                       }
+                   }
+               }
+           }
+
+
+           var chk = document.getElementById("chkAcknowledgement");
+           var err = document.getElementById("ackError");
+
+           if (!chk.checked) {
+               err.style.display = "block";
+               chk.focus();
+               return false;
+           }
+
+           err.style.display = "none";
+
+
+
+
+           return true;
+
+
+
+         
+       }
+   </script>
