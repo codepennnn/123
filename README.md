@@ -1,13 +1,14 @@
-var chk = document.getElementById('<%= chkAcknowledgement.ClientID %>');
-var err = document.getElementById("ackError");
+protected void btnSave_Click(object sender, EventArgs e)
+{
+    // 🔐 SERVER-SIDE ACKNOWLEDGEMENT VALIDATION
+    if (!chkAcknowledgement.Checked)
+    {
+        MyMsgBox.show(
+            CLMS.Control.MyMsgBox.MessageType.Errors,
+            "Please confirm the acknowledgement before submitting the request."
+        );
 
-if (!chk.checked) {
-    err.style.display = "block";
+        return; // ⛔ Stop processing
+    }
 
-    alert("Please confirm the acknowledgement before submitting the request.");
-
-    chk.focus();
-    return false;
-}
-
-err.style.display = "none";
+    // ✅ Continue with existing save/update logic below
