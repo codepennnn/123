@@ -1,14 +1,23 @@
-protected void btnSave_Click(object sender, EventArgs e)
+if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0].RowState.ToString() == "Modified")
 {
-    // 🔐 SERVER-SIDE ACKNOWLEDGEMENT VALIDATION
-    if (!chkAcknowledgement.Checked)
+    foreach (DataRow dr in ds.Tables[0].Rows)
     {
-        MyMsgBox.show(
-            CLMS.Control.MyMsgBox.MessageType.Errors,
-            "Please confirm the acknowledgement before submitting the request."
-        );
+        dr["Final_Attachment"] = attachments;
+        dr["Status"] = "Pending With CC";
+        dr["ResubmitedOn"] = System.DateTime.Now;
 
-        return; // ⛔ Stop processing
+
     }
+}
 
-    // ✅ Continue with existing save/update logic below
+else
+{
+    foreach (DataRow dr in ds.Tables[0].Rows)
+    {
+        dr["Final_Attachment"] = attachments;
+        dr["Status"] = "Pending With CC";
+        
+
+
+    }
+}
