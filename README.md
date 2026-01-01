@@ -1,56 +1,24 @@
-  if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Status"].ToString() == "Approved")
+     if (PageRecordDataSet.Tables["App_BOCW_Summary_wo"].Rows[0]["STATUS"].ToString() == "Approved")
 
-  {
-      foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
+     {
 
-      {
-
-          r["CC_UpdatedOn"] = System.DateTime.Now;
-          r["CC_UpdatedBy"] = Session["UserName"].ToString();
-          r["Status"] = "Approved";
-          r["Remarks"] = r["Remarks"].ToString() + "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + " -- " + Remarks_CC + ")|";
+         PageRecordDataSet.Tables["App_BOCW_Summary_wo"].Rows[0]["CC_CreatedOn"] = System.DateTime.Now;
+         PageRecordDataSet.Tables["App_BOCW_Summary_wo"].Rows[0]["CC_CreatedBy"] = Session["UserName"].ToString();
+         PageRecordDataSet.Tables["App_BOCW_Summary_wo"].Rows[0]["STATUS"] = "Approved";
+         PageRecordDataSet.Tables["App_BOCW_Summary_wo"].Rows[0]["Remarks"] = PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Remarks"].ToString() + "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + " -- " + Remarks_CC + ")|";
 
 
-      }
-  }
-  else
-  {
+      
 
-      foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
+         
+     }
+     else
+     {
 
-      {
-          r["CC_UpdatedOn"] = System.DateTime.Now;
-          r["CC_UpdatedBy"] = Session["UserName"].ToString();
-          r["Status"] = "Return";
-          r["Remarks"] = r["Remarks"].ToString() + "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + " -- " + Remarks_CC + ")|";
-      }
-  }
-
-
-   if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Status"].ToString() == "Approved")
-
-   {
-       foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
-
-       {
-
-           r["CC_UpdatedOn"] = System.DateTime.Now;
-           r["CC_UpdatedBy"] = Session["UserName"].ToString();
-           r["Status"] = "Approved";
-           r["Remarks"] = r["Remarks"].ToString() + "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + " -- " + Remarks_CC + ")|";
-
-
-       }
-   }
-   else
-   {
-
-       foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
-
-       {
-           r["CC_UpdatedOn"] = System.DateTime.Now;
-           r["CC_UpdatedBy"] = Session["UserName"].ToString();
-           r["Status"] = "Return";
-           r["Remarks"] = r["Remarks"].ToString() + "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + " -- " + Remarks_CC + ")|";
-       }
-   }
+         PageRecordDataSet.Tables["App_BOCW_Summary_wo"].Rows[0]["CC_CreatedOn"] = System.DateTime.Now;
+         PageRecordDataSet.Tables["App_BOCW_Summary_wo"].Rows[0]["CC_CreatedBy"] = Session["UserName"].ToString();
+         PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["STATUS"] = "Return";
+         PageRecordDataSet.Tables["App_BOCW_Summary_wo"].Rows[0]["Remarks"] = PageRecordDataSet.Tables["App_WorkOrder_Exemption"].Rows[0]["Remarks"].ToString() + "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + " -- " + Remarks_CC + ")|";
+         
+         
+     }
