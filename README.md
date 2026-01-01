@@ -1,23 +1,27 @@
-if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0].RowState.ToString() == "Modified")
-{
-    foreach (DataRow dr in ds.Tables[0].Rows)
-    {
-        dr["Final_Attachment"] = attachments;
-        dr["Status"] = "Pending With CC";
-        dr["ResubmitedOn"] = System.DateTime.Now;
+  if (PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows[0]["Status"].ToString() == "Approved")
+
+  {
+      foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
+
+      {
+
+          r["CC_UpdatedOn"] = System.DateTime.Now;
+          r["CC_UpdatedBy"] = Session["UserName"].ToString();
+          r["Status"] = "Approved";
+          r["Remarks"] = r["Remarks"].ToString() + "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + " -- " + Remarks_CC + ")|";
 
 
-    }
-}
+      }
+  }
+  else
+  {
 
-else
-{
-    foreach (DataRow dr in ds.Tables[0].Rows)
-    {
-        dr["Final_Attachment"] = attachments;
-        dr["Status"] = "Pending With CC";
-        
+      foreach (DataRow r in PageRecordDataSet.Tables["App_Half_Yearly_Details"].Rows)
 
-
-    }
-}
+      {
+          r["CC_UpdatedOn"] = System.DateTime.Now;
+          r["CC_UpdatedBy"] = Session["UserName"].ToString();
+          r["Status"] = "Return";
+          r["Remarks"] = r["Remarks"].ToString() + "( CC --" + System.DateTime.Now.ToString("dd/MM/yyyy hh:mm:ss tt") + " -- " + Remarks_CC + ")|";
+      }
+  }
