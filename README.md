@@ -1,3 +1,44 @@
+SELECT *
+FROM UserLoginDB.dbo.aspnet_Users
+WHERE UserId IN (
+    SELECT UserId
+    FROM App_UserFormPermission
+    WHERE AllowRead = 0
+      AND AllowWrite = 0
+      AND AllowModify = 0
+      AND FormId IN (
+          SELECT Id
+          FROM App_ApplicationForms
+          WHERE Description LIKE 'V - %'
+      )
+)
+AND LEN(UserName) = 5
+AND ISNUMERIC(LoweredUserName) = 1;
+
+
+
+SELECT *
+FROM UserLoginDB.dbo.aspnet_Users u
+WHERE LEN(u.UserName) = 5
+  AND ISNUMERIC(u.LoweredUserName) = 1
+  AND NOT EXISTS (
+        SELECT 1
+        FROM App_UserFormPermission p
+        WHERE p.UserId = u.UserId
+          AND p.FormId IN (
+                SELECT Id
+                FROM App_ApplicationForms
+                WHERE Description LIKE 'V - %'
+          )
+          AND (
+                p.AllowRead <> 0
+             OR p.AllowWrite <> 0
+             OR p.AllowModify <> 0
+          )
+      );
+
+
+
 
 SELECT u.UserName, p.FormId
 FROM UserLoginDB.dbo.aspnet_Users u
