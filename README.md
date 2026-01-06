@@ -1,3 +1,18 @@
+
+SELECT u.UserName, p.FormId
+FROM UserLoginDB.dbo.aspnet_Users u
+JOIN App_UserFormPermission p ON u.UserId = p.UserId
+JOIN App_ApplicationForms f ON p.FormId = f.Id
+WHERE p.AllowRead = 0
+  AND p.AllowWrite = 0
+  AND p.AllowModify = 0
+  AND f.Description LIKE 'V - %'
+  AND LEN(u.UserName) = 5
+  AND ISNUMERIC(u.LoweredUserName) = 1;
+
+
+
+
 select  * from UserLoginDB.dbo.aspnet_Users where UserId in
 (select distinct UserId from App_UserFormPermission where AllowRead=0 OR AllowWrite=0 OR AllowModify=0 and
 FormId in
