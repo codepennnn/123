@@ -1,36 +1,21 @@
-<asp:TextBox 
-    ID="DOJ"
-    runat="server"
-    CssClass="form-control form-control-sm textboxstyle"
-    placeholder="DD / MM / YYYY"
-    MaxLength="14"
-    inputmode="numeric"
-    oninput="formatDOB(this)"
-    onblur="validateDOB(this)" />
-
-
-    <script>
+<script>
 function formatDOB(input) {
-    let value = input.value.replace(/\D/g, '');
+    let v = input.value.replace(/\D/g, '');
 
-    if (value.length > 8) value = value.substring(0, 8);
+    if (v.length > 8) v = v.substring(0, 8);
 
-    let formatted = '';
-
-    if (value.length >= 1)
-        formatted = value.substring(0, 2);
-    if (value.length >= 3)
-        formatted = value.substring(0, 2) + ' / ' + value.substring(2, 4);
-    if (value.length >= 5)
-        formatted = value.substring(0, 2) + ' / ' + value.substring(2, 4) + ' / ' + value.substring(4, 8);
-
-    input.value = formatted;
+    if (v.length >= 5)
+        input.value = v.substring(0, 2) + '/' + v.substring(2, 4) + '/' + v.substring(4);
+    else if (v.length >= 3)
+        input.value = v.substring(0, 2) + '/' + v.substring(2);
+    else
+        input.value = v;
 }
 
 function validateDOB(input) {
-    const regex = /^(0[1-9]|[12][0-9]|3[01]) \/ (0[1-9]|1[0-2]) \/ \d{4}$/;
+    const regex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
     if (input.value !== "" && !regex.test(input.value)) {
-        alert("Please enter a valid date in DD / MM / YYYY format");
+        alert("Please enter date in dd/MM/yyyy format");
         input.value = "";
         input.focus();
     }
