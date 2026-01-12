@@ -1,44 +1,24 @@
-/* Grid main table */
-.custom-grid table {
-    width: 100%;
-    border-collapse: collapse;
-    table-layout: fixed;
-    font-size: 12px;
+<asp:TemplateField HeaderText="From Date"
+    HeaderStyle-HorizontalAlign="Center"
+    HeaderStyle-ForeColor="White"
+    HeaderStyle-Width="7%">
+
+    <ItemStyle HorizontalAlign="Center" />
+
+    <ItemTemplate>
+        <asp:Label ID="FROM_DATE" runat="server"></asp:Label>
+    </ItemTemplate>
+</asp:TemplateField>
+
+/* Hover effect */
+.custom-grid tr:hover td {
+    background-color: #eef5ff;
+    transition: background-color 0.2s ease-in-out;
 }
 
-/* Header */
+/* Sticky header */
 .custom-grid th {
-    background-color: #5D7B9D;
-    color: white;
-    text-align: center;
-    padding: 6px;
-    border: 1px solid #c5c5c5;
-    white-space: normal;
-}
-
-/* Rows */
-.custom-grid td {
-    border: 1px solid #d1d1d1;
-    padding: 6px;
-    vertical-align: top;
-    word-wrap: break-word;
-    white-space: normal;
-}
-
-/* Alternate row */
-.custom-grid tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-/* Label wrapping */
-.custom-grid label {
-    display: block;
-    white-space: normal;
-    word-break: break-word;
-}
-
-/* Dropdown smaller */
-.custom-grid select {
-    width: 100% !important;
-    font-size: 11px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
