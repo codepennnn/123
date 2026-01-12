@@ -1,272 +1,114 @@
-        public DataSet GetData(string vcode, string fromdt, string todt,string Period,int year, string wageMonth)
-        {
-            Dictionary<string, object> objParam = new Dictionary<string, object>();
-            DataHelper dh = new DataHelper();
-            // string strSQL = "SELECT newid() as ID,LicNo as LabourLicNo,FromDate,ToDate FROM App_LabourLicenseSubmission  WHERE  Vcode = @Vcode";
-
-            //string strSQL = " SELECT newid() as ID,LicNo as LabourLicNo,FromDate,ToDate FROM App_LabourLicenseSubmission  WHERE  " +
-            //" FromDate < @FromDate AND ToDate >= @ToDate and WorkLocation in ('Jamshedpur', 'Seraikela') and Vcode = @Vcode";
-
-            //string strSQL = "SELECT newid() as ID,LicNo as LabourLicNo,FromDate,ToDate,convert(varchar(10),DATEDIFF(DAY, convert(datetime,FromDate,103), " +
-            //    "convert(datetime,ToDate,103))) AS Duration_Of_Contract,(select concat (V_NAME,', ',ADDRESS) from App_Vendor_Reg R where R.V_CODE=Vcode) as Name_Address_Of_Contractor" +
-            //    " FROM App_LabourLicenseSubmission  WHERE   FromDate < @FromDate AND ToDate >= @ToDate and VCode=@Vcode and WorkLocation in('Jamshedpur','Saraiekela')";
-
-
-
-            string strSQL = @"
-
-
-
-                                        SET DATEFIRST 7;  
-
-                    ;WITH d AS (
-                        SELECT CAST( @ToDate AS date) AS dt
-                        UNION ALL
-                        SELECT DATEADD(DAY, 1, dt)
-                        FROM d
-                        WHERE dt < @FromDate 
-                    ),
-                    WorkDays AS (
-                        SELECT COUNT(*) AS Establishment_Of_Principal_Emp_Worked
-                        FROM d
-                        WHERE DATEPART(WEEKDAY, dt) <> 1  
-                    )
-
-
-
-
-
-                        SELECT NEWID() AS ID,l.LicNo AS LabourLicNo,l.FromDate,l.ToDate,CAST(l.workerno AS INT) AS workerno,
-                                CONVERT(varchar(10),
-
-                             
-                            
-                                
-
-
+  <div runat="server" id="ContainerDiv" class="w-100 border">
+      <cc1:DetailsContainer ID="WODetails_Record" runat="server"
+          AutoGenerateColumns="False" AllowPaging="false"
+          CellPadding="4" GridLines="None" Width="100%" DataMember="App_Bocw_details_workorder"
+          DataKeyNames="ID"
+          DataSource="<%# PageRecordDataSet %>"
+          ForeColor="#333333" ShowHeaderWhenEmpty="True"                              
+          PageSize="10" PagerSettings-Mode="Numeric" PagerStyle-Wrap="False" HeaderStyle-Font-Size="small" RowStyle-Font-Size="Small">
         
-                                DATEDIFF(DAY, CONVERT(datetime, l.FromDate, 103), CONVERT(datetime, l.ToDate, 103))) AS Duration_Of_Contract,
-                            (SELECT CONCAT(R.V_NAME, ', ', R.ADDRESS) FROM App_Vendor_Reg AS R WHERE R.V_CODE = l.VCode
-                            ) AS Name_Address_Of_Contractor,
-
-                               'JHARKHAND' as State,
-                                
 
 
+          <AlternatingRowStyle BackColor="White" ForeColor="#284775" />
+          <Columns>
+
+              <asp:TemplateField HeaderText="ID" Visible="False" HeaderStyle-HorizontalAlign="Left" ItemStyle-HorizontalAlign="Left">
+                  <ItemTemplate>
+                      <asp:Label ID="ID" runat="server"></asp:Label>
+                  </ItemTemplate>
+              </asp:TemplateField>
 
 
-                            c3.wo_no As WorkOrderNo,
-                            R.From_Date as Workorder_FromDate,
-                            R.TO_DATE as Workorder_ToDate,
+             
+               <asp:TemplateField HeaderText="Work Order" HeaderStyle-HorizontalAlign="Center" HeaderStyle-ForeColor="White" HeaderStyle-Width="5%"  >
+                   <ItemTemplate>
+                       <asp:label ID="WO_NO" runat="server"  Width="100%"></asp:label>
+                   </ItemTemplate>
+               </asp:TemplateField>
 
-                            (wds.Establishment_Of_Principal_Emp_Worked - 2 ) as Establishment_Of_Principal_Emp_Worked ,
-                       
+              <asp:TemplateField HeaderText="From Date" HeaderStyle-HorizontalAlign="Center" HeaderStyle-ForeColor="White" HeaderStyle-Width="5%">
+                  <ItemTemplate>
+                      <asp:Label ID="FROM_DATE" runat="server"  Width="100%"></asp:Label>
+                  </ItemTemplate>
+              </asp:TemplateField>
+              <asp:TemplateField HeaderText="To Date" HeaderStyle-HorizontalAlign="Center" HeaderStyle-ForeColor="White" HeaderStyle-Width="5%">
+                  <ItemTemplate>
+                      <asp:Label ID="TO_DATE" runat="server"  Width="100%"></asp:Label>
+                  </ItemTemplate>
+              </asp:TemplateField>
 
-    
-                         
+
+
+                   <asp:TemplateField HeaderText="Department Code" HeaderStyle-HorizontalAlign="Center" HeaderStyle-ForeColor="White" HeaderStyle-Width="5%">
+             <ItemTemplate>
+                 <asp:Label ID="DEPT_CODE" runat="server" Width="100%"></asp:Label>
+             </ItemTemplate>
+         </asp:TemplateField>
 
 
 
-                            ISNULL((
-                                SELECT TOP 1 
-                                    COUNT(DISTINCT w.AadharNo)
-                                FROM App_Wagesdetailsjharkhand w
-                                INNER JOIN App_EmployeeMaster em 
-                                    ON em.AadharCard = w.AadharNo 
-                                   AND em.Sex = 'M'
-                                WHERE w.workorderno = c3.wo_no
-                                  AND w.vendorcode = @Vcode
-                                  AND w.yearwage = @year
-                                  AND CHARINDEX(',' + CAST(w.monthwage AS VARCHAR(10)) + ',', ',' + @wageMonth + ',') > 0
-                                GROUP BY MonthWage
-                                ORDER BY COUNT(DISTINCT w.AadharNo) DESC
-                            ), 0) AS sex_M,
+              <asp:TemplateField HeaderText="Department Desc" HeaderStyle-HorizontalAlign="Center" HeaderStyle-ForeColor="White" HeaderStyle-Width="5%">
+                  <ItemTemplate>
+                      <asp:Label ID="DepartmentDesc" runat="server" Width="100%"></asp:Label>
+                  </ItemTemplate>
+              </asp:TemplateField>
 
-                            
-                         ISNULL((
-                                SELECT TOP 1 
-                                    COUNT(DISTINCT w.AadharNo)
-                                FROM App_Wagesdetailsjharkhand w
-                                INNER JOIN App_EmployeeMaster em 
-                                    ON em.AadharCard = w.AadharNo 
-                                   AND em.Sex = 'F'
-                                WHERE w.workorderno = c3.wo_no
-                                  AND w.vendorcode = @Vcode
-                                  AND w.yearwage = @year
-                                  AND CHARINDEX(',' + CAST(w.monthwage AS VARCHAR(10)) + ',', ',' + @wageMonth + ',') > 0
-                                GROUP BY MonthWage
-                                ORDER BY COUNT(DISTINCT w.AadharNo) DESC
-                            ), 0) AS sex_F,
+
+         
+
 
               
-                            (SELECT ISNULL(SUM(tab.TotalMandays), 0.00) FROM ( SELECT w.AadharNo, SUM(ISNULL(w.TotPaymentDays, 0)) AS TotalMandays
-                                    FROM app_wagesdetailsjharkhand AS w
-                                    INNER JOIN app_employeemaster AS em
-                                        ON em.aadharcard = w.aadharno AND em.sex = 'M'
-                                    WHERE w.workorderno = c3.wo_no
-                                      AND w.vendorcode = @Vcode
-                                      AND CHARINDEX(',' + CAST(w.monthwage AS VARCHAR(10)) + ',', ',' + @wageMonth + ',') > 0
-
-                                      AND w.yearwage = @year
-                                    GROUP BY w.AadharNo
-                                ) AS tab
-                            ) AS No_Of_Mandays_Worked_Men,
-
-                            (SELECT ISNULL(SUM(tab.TotalMandays), 0.00) FROM ( SELECT w.AadharNo, SUM(ISNULL(w.TotPaymentDays, 0)) AS TotalMandays
-                                    FROM app_wagesdetailsjharkhand AS w
-                                    INNER JOIN app_employeemaster AS em
-                                        ON em.aadharcard = w.aadharno AND em.sex = 'F'
-                                    WHERE w.workorderno = c3.wo_no
-                                      AND w.vendorcode = @Vcode
-                                     AND CHARINDEX(',' + CAST(w.monthwage AS VARCHAR(10)) + ',', ',' + @wageMonth + ',') > 0
-
-                                      AND w.yearwage = @year
-                                    GROUP BY w.AadharNo
-                                ) AS tab
-                            ) AS No_Of_Mandays_Worked_Women,
-                                
-                             0.00 as No_Of_Mandays_Worked_children,
-                                       
-                                     
-
-                       
-                            (SELECT ISNULL(SUM(tab.Male_Deduction), 0.00) FROM ( SELECT w.AadharNo, SUM(ISNULL(w.PFAmt,0) + ISNULL(w.ESIAmt,0)) AS Male_Deduction
-                                    FROM app_wagesdetailsjharkhand AS w
-                                    INNER JOIN app_employeemaster AS em
-                                        ON em.aadharcard = w.aadharno AND em.sex = 'M'
-                                    WHERE w.workorderno = c3.wo_no
-                                      AND w.vendorcode = @Vcode
-                                      AND CHARINDEX(',' + CAST(w.monthwage AS VARCHAR(10)) + ',', ',' + @wageMonth + ',') > 0
-
-                                      AND w.yearwage = @year
-                                    GROUP BY w.AadharNo
-                                ) AS tab
-                            ) AS Amt_Of_Deduct_From_Wages_Men,
-
-                            (SELECT ISNULL(SUM(tab.Female_Deduction), 0.00) FROM ( SELECT w.AadharNo, SUM(ISNULL(w.PFAmt,0) + ISNULL(w.ESIAmt,0)) AS Female_Deduction
-                                    FROM app_wagesdetailsjharkhand AS w
-                                    INNER JOIN app_employeemaster AS em
-                                        ON em.aadharcard = w.aadharno AND em.sex = 'F'
-                                    WHERE w.workorderno = c3.wo_no
-                                      AND w.vendorcode = @Vcode
-                                     AND CHARINDEX(',' + CAST(w.monthwage AS VARCHAR(10)) + ',', ',' + @wageMonth + ',') > 0
-
-                                      AND w.yearwage = @year
-                                    GROUP BY w.AadharNo
-                                ) AS tab
-                            ) AS Amt_Of_Deduct_From_Wages_Women,
+              <asp:TemplateField HeaderText="Nature of Work" HeaderStyle-HorizontalAlign="Center" HeaderStyle-ForeColor="White" HeaderStyle-Width="5%">
+                  <ItemTemplate>
+                      <asp:Label ID="NATURE_OF_WORK" runat="server"  Width="100%"></asp:Label>
+                  </ItemTemplate>
+              </asp:TemplateField>
 
 
-                                   0.00 as Amt_Of_Deduct_From_Wages_Children,
-                                   
+              <asp:TemplateField HeaderText="BOCW Applicablity No." HeaderStyle-HorizontalAlign="Center" HeaderStyle-ForeColor="White" HeaderStyle-Width="5%">
+                  <ItemTemplate>
+                      <asp:Label ID="BOCW_NUMBER" runat="server"  Width="100%"></asp:Label>
+                  </ItemTemplate>
+              </asp:TemplateField>
 
-                          
-                            (SELECT ISNULL(SUM(tab.Male_Gross), 0.00) FROM ( SELECT w.AadharNo, SUM(ISNULL(w.TotalWages,0)) AS Male_Gross
-                                    FROM app_wagesdetailsjharkhand AS w
-                                    INNER JOIN app_employeemaster AS em
-                                        ON em.aadharcard = w.aadharno AND em.sex = 'M'
-                                    WHERE w.workorderno = c3.wo_no
-                                      AND w.vendorcode = @Vcode
-                                      AND CHARINDEX(',' + CAST(w.monthwage AS VARCHAR(10)) + ',', ',' + @wageMonth + ',') > 0
+              <asp:TemplateField HeaderText="BOCW Applicablity Desc." HeaderStyle-HorizontalAlign="Center" HeaderStyle-ForeColor="White" HeaderStyle-Width="5%">
+                  <ItemTemplate>
+                      <asp:Label ID="BOCW_DESC" runat="server"  Width="100%"></asp:Label>
+                  </ItemTemplate>
+              </asp:TemplateField>
 
-                                      AND w.yearwage = @year
-                                    GROUP BY w.AadharNo
-                                ) AS tab
-                            ) AS Amount_Of_Wages_Paid_Men,
+              <asp:TemplateField HeaderText="BOCW APPLICABLE AS PER CC" HeaderStyle-ForeColor="White">
+                  <ItemTemplate>
+                      <asp:DropDownList ID="BOCW_APPLICABLE_AS_PER_CC" runat="server" CssClass="form-control form-control-sm font-small" Width="300px" Enabled="false">
 
-                            (SELECT ISNULL(SUM(tab.Female_Gross), 0.00) FROM (SELECT w.AadharNo, SUM(ISNULL(w.TotalWages,0)) AS Female_Gross
-                                    FROM app_wagesdetailsjharkhand AS w
-                                    INNER JOIN app_employeemaster AS em
-                                        ON em.aadharcard = w.aadharno AND em.sex = 'F'
-                                    WHERE w.workorderno = c3.wo_no
-                                      AND w.vendorcode = @Vcode
-                                     AND CHARINDEX(',' + CAST(w.monthwage AS VARCHAR(10)) + ',', ',' + @wageMonth + ',') > 0
+                          <asp:ListItem></asp:ListItem>
+                          <asp:ListItem Value="0">0 - Not applicable</asp:ListItem>
+                          <asp:ListItem Value="1">1 - Applicable and pay by Tata Steel UISL</asp:ListItem>
+                          <asp:ListItem Value="2">2 - AApplicable and pay by Vendor</asp:ListItem>
 
-                                      AND w.yearwage = @year
-                                    GROUP BY w.AadharNo
-                                ) AS tab
-                            ) AS Amount_Of_Wages_Paid_Women,
+                      </asp:DropDownList>
 
 
-                        0.00 as Amount_Of_Wages_Paid_Children,
+                 
+
+                  </ItemTemplate>
+              </asp:TemplateField>
+    
 
 
+          </Columns>
+          <EditRowStyle BackColor="#999999" />
+          <FooterStyle BackColor="#5D7B9D" ForeColor="White" Font-Bold="True" />
+          <HeaderStyle BackColor="#5D7B9D" Font-Bold="True" ForeColor="White" />
 
-
-  ( select Name_Address_Of_Establishment from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Name_Address_Of_Establishment ,
-
-
-ISNULL((SELECT Contractors_Establishment_Worked FROM App_Half_Yearly_Details WHERE Year = @year  AND 
-Period = @Period AND VCode = @Vcode AND c3.wo_no = WorkOrderNo),153) as Contractors_Establishment_Worked ,
-
-
-
-  ( select Name_and_Address_Of_PrincipalEmp from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Name_and_Address_Of_PrincipalEmp ,
-
-   ( select Weekly_Holiday from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Weekly_Holiday ,
-
-
-   ( select Status from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Status ,
-
-
-  ( select State from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as State ,
-                          
-                                  ( select Welfare_Canteen from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Welfare_Canteen ,
-
-
-     ( select Welfare_RestRoom from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Welfare_RestRoom ,
-
-    ( select Welfare_DrinkingWater from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Welfare_DrinkingWater ,
-
-
- 
-
-                                  ( select Welfare_Creches from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Welfare_Creches ,
-
-
-   ( select Welfare_FirstAid from App_Half_Yearly_Details where Year=@year 
-and Period=@Period and VCode=@Vcode and c3.wo_no=WorkOrderNo ) as Welfare_FirstAid 
-
-
-
-
-
-
-                        FROM App_LabourLicenseSubmission AS l
-                        LEFT JOIN App_vendor_form_c3_dtl AS c3
-                            ON c3.ll_no = l.LicNo
-                         left join App_WorkOrder_Reg R 
-                            on c3.WO_NO=R.WO_NO
-                            CROSS JOIN WorkDays wds
-                        WHERE
-                            c3.status = 'Approved'
-                            AND l.FromDate < @ToDate
-                            AND l.ToDate >= @FromDate
-                            AND l.VCode = @Vcode
-                            AND l.WorkLocation IN ('Jamshedpur', 'Saraiekela')
-                            order by l.LicNo 
-                            OPTION (MAXRECURSION 0);";
-
-
-
-
-
-
-            objParam.Add("Vcode", vcode); 
-            objParam.Add("FromDate", todt);
-            objParam.Add("ToDate", fromdt);
-            objParam.Add("Period", Period);
-            objParam.Add("year", year);
-            objParam.Add("wageMonth", wageMonth);
-            DataSet ds = dh.GetDataset(strSQL, "App_Half_Yearly_Details", objParam);
-            return ds;
-        }
+          <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center"
+              Font-Bold="True" CssClass="pager1" />
+          <PagerStyle BackColor="#284775" ForeColor="White" HorizontalAlign="Center" Font-Bold="True" />
+          <RowStyle BackColor="#F7F6F3" ForeColor="#333333" />
+          <SelectedRowStyle BackColor="#E2DED6" Font-Bold="False" ForeColor="#333333" />
+          <SortedAscendingCellStyle BackColor="#E9E7E2" />
+          <SortedAscendingHeaderStyle BackColor="#506C8C" />
+          <SortedDescendingCellStyle BackColor="#FFFDF8" />
+          <SortedDescendingHeaderStyle BackColor="#6F8DAE" />
+      </cc1:DetailsContainer>
+  </div>
