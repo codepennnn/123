@@ -1,89 +1,69 @@
-<div class="grid-wrapper">
-    <cc1:DetailsContainer ID="WODetails_Record" runat="server"
-        CssClass="modern-grid"
-        AutoGenerateColumns="False"
-        AllowPaging="false"
-        GridLines="None"
-        Width="100%"
-        DataMember="App_Bocw_details_workorder"
-        DataKeyNames="ID"
-        DataSource="<%# PageRecordDataSet %>"
-        ShowHeaderWhenEmpty="True">
-        ...
-    </cc1:DetailsContainer>
-</div>
-
-
-/* Grid container */
+/* Container */
 .grid-wrapper {
+    width: 100%;
     overflow-x: auto;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    background: #fff;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    background: #ffffff;
 }
 
-/* Main grid */
+/* Grid */
 .modern-grid {
-    border-collapse: separate;
-    border-spacing: 0;
+    table-layout: fixed;              /* 🔥 CRITICAL */
+    width: 1600px;                    /* 🔥 FORCE WIDTH */
+    border-collapse: collapse;
     font-size: 13px;
-    min-width: 1200px; /* prevents squeeze */
 }
 
 /* Header */
 .modern-grid th {
-    background: linear-gradient(180deg, #0d6efd, #084298);
-    color: #fff !important;
-    text-align: center;
+    background: #0d3b66;
+    color: #ffffff !important;
     padding: 10px 8px;
+    text-align: center;
     font-weight: 600;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    border-bottom: 2px solid #084298;
+    border-bottom: 2px solid #092c4c;
     white-space: nowrap;
 }
 
 /* Body cells */
 .modern-grid td {
     padding: 8px 10px;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #e5e7eb;
     vertical-align: middle;
-    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-/* Alternate rows */
+/* Alternating rows */
 .modern-grid tr:nth-child(even) {
-    background-color: #f8f9fa;
+    background-color: #f8fafc;
 }
 
-/* Hover effect */
+/* Hover */
 .modern-grid tr:hover {
-    background-color: #e9f2ff;
-    transition: background-color 0.2s ease-in-out;
+    background-color: #eef6ff;
 }
 
-/* Text wrapping for long content */
+/* Text wrap (for long text only) */
 .wrap-text {
     white-space: normal;
     word-break: break-word;
 }
 
-/* Disabled dropdown look */
-.modern-grid select:disabled {
-    background-color: #e9ecef;
-    color: #495057;
-    border: 1px solid #ced4da;
-    cursor: not-allowed;
+/* Center content */
+.text-center {
+    text-align: center;
 }
 
-/* Improve dropdown width */
+/* Dropdown column */
 .modern-grid select {
-    min-width: 260px;
+    width: 100%;
     font-size: 12px;
 }
 
-/* Center short fields */
-.text-center {
-    text-align: center;
+/* Disabled dropdown */
+.modern-grid select:disabled {
+    background-color: #f1f5f9;
+    color: #374151;
 }
