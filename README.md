@@ -1,16 +1,11 @@
-bool result = Save();
-
-if (result)
+using (SqlConnection con = new SqlConnection(
+       ConfigurationManager.ConnectionStrings["YourConnectionString"].ConnectionString))
 {
-    // =================== NEW CODE START ===================
-    DataHelper dh = new DataHelper();
-    SqlTransaction tran = null;
+    con.Open();
+    SqlTransaction tran = con.BeginTransaction();
 
     try
     {
-        dh.OpenConnection();
-        tran = dh.BeginTransaction();
-
         foreach (DataRow r in PageRecordDataSet.Tables["App_BOCW_details_workorder"].Rows)
         {
             if (r.RowState == DataRowState.Modified ||
@@ -19,22 +14,23 @@ if (result)
                 string woNo = r["WorkOrderNo"].ToString();
                 string bocwValue = r["BOCW_APPLICABLE_AS_PER_CC"].ToString();
 
-                string sql = @"UPDATE App_WorkOrder_Reg
-                               SET BOCW_APPLICABLE_AS_PER_CC = @BOCW
-                               WHERE WO_NO = @WO_NO";
+                SqlCommand cmd = new SqlCommand(
+                    @"UPDATE App_WorkOrder_Reg
+                      SET BOCW_APPLICABLE_AS_PER_CC = @BOCW
+                      WHERE WO_NO = @WO_NO",
+                    con, tran);
 
-                Dictionary<string, object> param = new Dictionary<string, object>();
-                param.Add("@BOCW", bocwValue);
-                param.Add("@WO_NO", woNo);
+                cmd.Parameters.AddWithValue("@BOCW", bocwValue);
+                cmd.Parameters.AddWithValue("@WO_NO", woNo);
 
-                int rows = dh.ExecuteNonQuery(sql, param, tran);
+                int rows = cmd.ExecuteNonQuery();
 
                 if (rows <= 0)
                 {
                     tran.Rollback();
                     MyMsgBox.show(
                         CLMS.Control.MyMsgBox.MessageType.Errors,
-                        "Work Order update failed. Changes rolled back.");
+                        "Work Order update failed. Transaction rolled back.");
                     return;
                 }
             }
@@ -42,43 +38,12 @@ if (result)
 
         tran.Commit();
     }
-    catch
+    catch (Exception ex)
     {
-        if (tran != null)
-            tran.Rollback();
-
+        tran.Rollback();
         MyMsgBox.show(
             CLMS.Control.MyMsgBox.MessageType.Errors,
-            "Error while updating Work Order. Transaction rolled back.");
+            "Error occurred while updating Work Order.");
         return;
     }
-    finally
-    {
-        dh.CloseConnection();
-    }
-    // =================== NEW CODE END ===================
-
-
-    // 🔹 YOUR EXISTING UI RESET CODE (UNCHANGED)
-    PageRecordDataSet.Clear();
-    summary_Record.BindData();
-    PageRecordsDataSet.Clear();
-    summary_Entry_Record.BindData();
-    GetRecords(GetFilterCondition(), summary_Records.PageSize, 10, "");
-    summary_Records.BindData();
-    btnSave.Visible = false;
-    div_Remarks.Visible = false;
-    WODetails_Record.BindData();
-    ContainerDiv.Style["overflow"] = "";
-    ContainerDiv.Style["height"] = "";
-
-    MyMsgBox.show(
-        CLMS.Control.MyMsgBox.MessageType.Success,
-        "Record saved successfully !");
-}
-else
-{
-    MyMsgBox.show(
-        CLMS.Control.MyMsgBox.MessageType.Errors,
-        "Error While Saving !");
 }
