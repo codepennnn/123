@@ -73,3 +73,34 @@
 
 
     }
+
+
+      protected void PERIOD_SelectedIndexChanged(object sender, EventArgs e)
+  {
+      if (((DropDownList)summary_Record.Rows[0].FindControl("PERIOD")).SelectedValue == "" || ((DropDownList)summary_Record.Rows[0].FindControl("YEAR")).SelectedValue == "")
+      {
+          MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Warning, "Please select Period & Year.");
+      }
+      else
+      {
+          PageRecordDataSet.Tables["App_Bocw_details_workorder"].Clear();
+          get_wo();
+          WODetails_Record.BindData();
+      }
+  }
+
+  protected void YEAR_SelectedIndexChanged(object sender, EventArgs e)
+  {
+      if (((DropDownList)summary_Record.Rows[0].FindControl("PERIOD")).SelectedValue == "" || ((DropDownList)summary_Record.Rows[0].FindControl("YEAR")).SelectedValue == "")
+      {
+          MyMsgBox.show(CLMS.Control.MyMsgBox.MessageType.Warning, "Please select Period & Year.");
+      }
+      else
+      {
+          PageRecordDataSet.Tables["App_Bocw_details_workorder"].Clear();
+          get_wo();
+          WODetails_Record.BindData();
+      }
+  }
+
+
