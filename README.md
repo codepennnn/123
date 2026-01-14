@@ -1,33 +1,9 @@
-<asp:Repeater ID="WAGE_REGIS_FILE1" runat="server">
-    <ItemTemplate>
-        <a href='<%# Eval("Url") %>' target="_blank"
-           style="color:blue;text-decoration:underline">
-            <%# Eval("Name") %>
-        </a><br />
-    </ItemTemplate>
-</asp:Repeater>
+2b569210-e839-4c37-bd17-b56ed7f5e011_WAGES REGISTER FEB-25.pdf
 
-Repeater rpt = (Repeater)SummaryReport_Record.Rows[0]
-                .FindControl("WAGE_REGIS_FILE1");
 
-string file = PageRecordDataSet.Tables["App_Online_Wages"]
-              .Rows[0]["WAGE_REGIS_FILE"].ToString();
+file:///D:/Cybersoft_Doc/CLMS/Attachments/2b569210-e839-4c37-bd17-b56ed7f5e011_WAGES%20REGISTER%20FEB-25.pdf
 
-if (!string.IsNullOrWhiteSpace(file))
-{
-    DataTable dt = new DataTable();
-    dt.Columns.Add("Name");
-    dt.Columns.Add("Url");
 
-    string fileName = Path.GetFileName(file);
 
-    dt.Rows.Add(
-        fileName,
-        ResolveUrl("~/FileDownloadHandler.ashx?file=" +
-                   Server.UrlEncode(fileName))
-    );
 
-    rpt.DataSource = dt;
-    rpt.DataBind();
-}
-
+http://localhost:15720/FileDownloadHandler.ashx?file=2b569210-e839-4c37-bd17-b56ed7f5e011_WAGES+REGISTER+FEB-25.pdf not found
