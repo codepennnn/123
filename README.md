@@ -10,17 +10,15 @@ if (!string.IsNullOrWhiteSpace(file))
     dt.Columns.Add("Name");
     dt.Columns.Add("Url");
 
-    // Show only original filename (no GUID)
+    // Show clean filename (remove GUID)
     string displayName = file.Contains("_")
         ? file.Substring(file.IndexOf('_') + 1)
         : file;
 
-    // 🔥 IMPORTANT: avoid + in URL (NO handler change needed)
-    string safeFile = file.Replace(" ", "%20");
-
+    // 🚫 NO UrlEncode
     dt.Rows.Add(
         displayName,
-        ResolveUrl("~/FileDownloadHandler.ashx?file=" + safeFile)
+        ResolveUrl("~/FileDownloadHandler.ashx?file=" + file)
     );
 
     rpt.DataSource = dt;
