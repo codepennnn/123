@@ -3,23 +3,17 @@ BulletedList bl = (BulletedList)SummaryReport_Record.Rows[0]
 
 bl.Items.Clear();
 
-string files = PageRecordDataSet.Tables["App_Online_Wages"]
-                .Rows[0]["WAGE_REGIS_FILE"].ToString();
+string file = PageRecordDataSet.Tables["App_Online_Wages"]
+               .Rows[0]["WAGE_REGIS_FILE"].ToString();
 
-if (!string.IsNullOrEmpty(files))
+if (!string.IsNullOrWhiteSpace(file))
 {
-    string[] attachments = files.Split(',');
+    string fileName = Path.GetFileName(file); // ✅ SAFE
 
-    foreach (string fullName in attachments)
-    {
-        if (string.IsNullOrWhiteSpace(fullName)) continue;
+    ListItem li = new ListItem();
+    li.Text = fileName;
+    li.Value = ResolveUrl("~/FileDownloadHandler.ashx?file=" +
+                          Server.UrlEncode(fileName));
 
-        string fileName = Path.GetFileName(fullName); // ✅ SAFE
-
-        ListItem li = new ListItem();
-        li.Text = fileName;
-        li.Value = ResolveUrl("~/FileDownloadHandler.ashx?file=" + Server.UrlEncode(fileName));
-
-        bl.Items.Add(li);
-    }
+    bl.Items.Add(li);
 }
