@@ -1,19 +1,33 @@
-BulletedList bl = (BulletedList)SummaryReport_Record.Rows[0]
-                    .FindControl("WAGE_REGIS_FILE1");
+<asp:Repeater ID="WAGE_REGIS_FILE1" runat="server">
+    <ItemTemplate>
+        <a href='<%# Eval("Url") %>' target="_blank"
+           style="color:blue;text-decoration:underline">
+            <%# Eval("Name") %>
+        </a><br />
+    </ItemTemplate>
+</asp:Repeater>
 
-bl.Items.Clear();
+Repeater rpt = (Repeater)SummaryReport_Record.Rows[0]
+                .FindControl("WAGE_REGIS_FILE1");
 
 string file = PageRecordDataSet.Tables["App_Online_Wages"]
-               .Rows[0]["WAGE_REGIS_FILE"].ToString();
+              .Rows[0]["WAGE_REGIS_FILE"].ToString();
 
 if (!string.IsNullOrWhiteSpace(file))
 {
-    string fileName = Path.GetFileName(file); // ✅ SAFE
+    DataTable dt = new DataTable();
+    dt.Columns.Add("Name");
+    dt.Columns.Add("Url");
 
-    ListItem li = new ListItem();
-    li.Text = fileName;
-    li.Value = ResolveUrl("~/FileDownloadHandler.ashx?file=" +
-                          Server.UrlEncode(fileName));
+    string fileName = Path.GetFileName(file);
 
-    bl.Items.Add(li);
+    dt.Rows.Add(
+        fileName,
+        ResolveUrl("~/FileDownloadHandler.ashx?file=" +
+                   Server.UrlEncode(fileName))
+    );
+
+    rpt.DataSource = dt;
+    rpt.DataBind();
 }
+
