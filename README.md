@@ -1,3 +1,41 @@
+/* Common attachment layout */
+.attach-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.attach-label {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 4px;
+}
+
+.attach-upload {
+    width: 70%;
+}
+
+.attach-list {
+    padding-left: 2px;
+}
+
+.attach-link {
+    display: block;
+    color: #0b5ed7;
+    text-decoration: underline;
+    font-size: 12px;
+    margin-bottom: 4px;
+    word-break: break-word;
+}
+
+
+
+
+
+
+
+
+
 <div class="row">
     <div class="col-md-6 mb-3">
         <div class="attach-group">
