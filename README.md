@@ -1,27 +1,16 @@
-foreach (Row row in rows)
-{
-    // 🔴 SKIP completely empty rows
-    bool isEmptyRow = true;
+SELECT SUM(ISNULL(TotPaymentDays,0)) AS total
+FROM App_WagesDetailsJharkhand
+WHERE VendorCode = '15235'
+  AND MonthWage IN (7,8,9,10,11,12)
+  AND YearWage = '2025';
 
-    foreach (Cell cell in row.Descendants<Cell>())
-    {
-        if (!string.IsNullOrWhiteSpace(GetCellValue(spreadSheetDocument, cell)))
-        {
-            isEmptyRow = false;
-            break;
-        }
-    }
 
-    if (isEmptyRow)
-        continue;
 
-    DataRow tempRow = dt.NewRow();
 
-    int columnIndex = 0;
-    foreach (Cell cell in row.Descendants<Cell>())
-    {
-        tempRow[columnIndex++] = GetCellValue(spreadSheetDocument, cell);
-    }
-
-    dt.Rows.Add(tempRow);
-}
+SELECT w.AadharNo,w.TotPaymentDays,w.monthwage
+FROM App_WagesDetailsJharkhand w
+JOIN App_EmployeeMaster em
+  ON w.AadharNo = em.AadharCard AND em.Sex = 'M'
+WHERE w.VendorCode = '15235'
+  AND w.MonthWage IN (7,8,9,10,11,12)
+  AND w.YearWage = '2025' order by AadharNo;
