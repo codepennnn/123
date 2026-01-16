@@ -1,26 +1,27 @@
-private string JsSafe(string message)
+foreach (Row row in rows)
 {
-    return message
-        .Replace("\\", "\\\\")
-        .Replace("'", "\\'")
-        .Replace("\"", "\\\"")
-        .Replace("\r", "")
-        .Replace("\n", "\\n");
+    // 🔴 SKIP completely empty rows
+    bool isEmptyRow = true;
+
+    foreach (Cell cell in row.Descendants<Cell>())
+    {
+        if (!string.IsNullOrWhiteSpace(GetCellValue(spreadSheetDocument, cell)))
+        {
+            isEmptyRow = false;
+            break;
+        }
+    }
+
+    if (isEmptyRow)
+        continue;
+
+    DataRow tempRow = dt.NewRow();
+
+    int columnIndex = 0;
+    foreach (Cell cell in row.Descendants<Cell>())
+    {
+        tempRow[columnIndex++] = GetCellValue(spreadSheetDocument, cell);
+    }
+
+    dt.Rows.Add(tempRow);
 }
-
-string errorMessage;
-
-if (!ValidateExcelData(out errorMessage))
-{
-    string safeMsg = JsSafe(errorMessage);
-
-    ScriptManager.RegisterStartupScript(
-        this,
-        this.GetType(),
-        "excelError",
-        $"alert('{safeMsg}');",
-        true
-    );
-    return;
-}
-
